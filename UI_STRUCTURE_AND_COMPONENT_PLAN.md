@@ -1,36 +1,44 @@
 # BeeFlow UI Structure and Component Plan
 
-## Product Shape
+BeeFlow is now structured as an interactive internal workflow app instead of a landing page.
 
-BeeFlow is structured as a desktop-first internal workflow OS for Beenco. The main shell uses a persistent sidebar, global search, quick actions, and a focused content workspace. The revised visual direction is fully dark, compact, and quiet: local Poppins typography, small cards, soft borders, clear pills, long landing-style dashboard sections, and limited accent color.
+## Product Structure
+
+- Role gate: first-time users choose who they are before entering the app.
+- Login gate: users enter a name/email and verify a one-time code sent by email.
+- Email backend contract: frontend calls `POST /api/auth/send-code` with `{ email, code, name, product }` and `POST /api/auth/verify-code` with `{ email, code }`. Codes must never be shown in the UI.
+- Setup checklist: create workspace, add department, invite team, create project, create task.
+- App shell: 240px sidebar, 64px topbar, compact content area.
+- Empty-first data model: no fake projects, tasks, clients, or team members load by default.
+- Local state: workspace data persists in `localStorage` until a backend is added.
 
 ## Core Views
 
-- Dashboard: daily overview, urgent work, QA status, active projects, notifications.
-- My Work List: auto-sorted personal work across assignments, reviews, mentions, stars, due dates, and QA.
-- Projects: client/project portfolio with status, priority, progress, team, and dates.
-- My Tasks: workflow board with drag and drop status movement.
-- Team: member profiles with role, department, workload, and completion counts.
-- Review Hub / QA: QA issue tracking and approval flow.
-- Figma Work: lightweight Figma metadata, frame specs, ratios, versions, and reviewers.
-- Docs: internal guidelines, SOPs, briefs, and client/project notes.
-- Files / Deliverables: metadata-first handling for large external files and final packages.
-- Reports: minimal workload, QA, delivery, and completion summaries.
-- Settings: workspace defaults for departments, task types, reminders, and deletion behavior.
+- Dashboard: compact metrics and empty states.
+- My Work List: assigned, mentioned, starred, review, overdue, due today, and rework tasks.
+- Projects: list/board toggle and project creation.
+- Tasks: workflow board with status dropdowns.
+- Review Hub: QA tabs and QA issue tracking.
+- Delivery: approved work and final delivery packages.
+- Figma Work: metadata and external Figma links only.
+- Docs: internal documentation editor modal.
+- Files: external file/deliverable metadata.
+- Team: invite team members from empty state.
+- Settings: workspace, role, departments, and reset controls.
 
-## Reusable Components
+## Required Interactions
 
-- App shell: sidebar, topbar, global search, responsive layout.
-- Work components: metric cards, task rows, task cards, kanban columns, detail panel.
-- Data labels: status pills, priority badges, tag chips, avatar stacks.
-- Workflow components: filter chips, quick actions, activity timeline, empty states.
-- Domain components: project cards, team cards, QA cards, Figma cards, doc cards, file rows.
+- New Task, New Project, Invite Team, Create Workspace, Create Doc.
+- Add Figma Link, Add File Link, Add Reminder, Add QA Issue.
+- Create Delivery, create/manage tags, edit profile.
+- Star task, change status, move to QA, mark complete, reopen task, delete task.
+- Task drawer with details, comments, mentions, files, Figma links, reminders, and activity.
+- @mention suggestions appear while typing `@` in a comment.
 
-## MVP Interaction Rules
+## Visual System
 
-- Task stars are personal to the current user.
-- Mentions place tasks into My Work List without changing assignee.
-- Completed tasks stay visible in history and can be represented separately.
-- Figma and file handling stays lightweight by storing metadata and links only.
-- QA follows the delivery flow: Ready for QA, In QA, Changes Required, Rechecking, Approved, Ready for Delivery.
-- Global search filters the active view without adding clutter.
+- Palette: black `#000000`, lemon `#D5FF27`, white `#FFFFFF`.
+- Supporting surfaces: `#080808`, `#111111`.
+- Borders: `rgba(255,255,255,0.08)`.
+- Muted text: `rgba(255,255,255,0.55)`.
+- No extra color coding, heavy gradients, fake charts, or large marketing hero sections.

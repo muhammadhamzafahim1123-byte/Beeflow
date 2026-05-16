@@ -1,18 +1,41 @@
-const currentUserId = "u1";
+const STORAGE_KEY = "beeflow:v2";
 
-const icons = {
-  dashboard: "dashboard",
-  work: "checklist",
-  projects: "grid",
-  tasks: "tasks",
-  team: "users",
-  qa: "shieldCheck",
-  figma: "figma",
-  docs: "document",
-  files: "folder",
-  reports: "chart",
-  settings: "settings",
-};
+const taskStatuses = [
+  "Backlog",
+  "To Do",
+  "In Progress",
+  "Ready for QA",
+  "In QA",
+  "Changes Required",
+  "Rechecking",
+  "Approved",
+  "Ready for Delivery",
+  "Delivered",
+  "Completed",
+];
+
+const priorities = ["Low", "Medium", "High", "Urgent", "Critical"];
+const roles = ["Owner / Admin", "Project Manager", "Designer", "Content Writer", "Developer", "QA / Reviewer", "Video / Motion Designer"];
+const departments = ["Design", "UI/UX", "Development", "Web3", "Content", "Video", "QA", "Management"];
+const docCategories = ["Brand Guidelines", "Content Guidelines", "Creative Direction", "QA Checklist", "Client Notes", "Delivery SOP", "Internal Process"];
+const qaStatuses = ["Open", "In Progress", "Fixed", "Rechecking", "Approved", "Rejected"];
+const qaTabs = ["Ready for QA", "In QA", "Changes Required", "Rechecking", "Approved"];
+const creativeTypes = ["UI/UX Design", "Brand Design", "Landing Page", "Website Design", "Social Post", "Presentation", "Animation", "Video", "Development", "Content", "QA Fix", "Client Feedback", "Final Delivery"];
+const commonSizes = ["1080 x 1080", "1080 x 1350", "1080 x 1920", "1920 x 1080", "1500 x 500", "1920 x 600", "1440 x 900", "1440 x 1024", "390 x 844", "Custom"];
+
+const navItems = [
+  ["dashboard", "Dashboard", "dashboard"],
+  ["work", "My Work List", "checklist"],
+  ["projects", "Projects", "grid"],
+  ["tasks", "Tasks", "tasks"],
+  ["review", "Review Hub", "shieldCheck"],
+  ["delivery", "Delivery", "folder"],
+  ["figma", "Figma Work", "figma"],
+  ["docs", "Docs", "document"],
+  ["files", "Files", "folder"],
+  ["team", "Team", "users"],
+  ["settings", "Settings", "settings"],
+];
 
 const svgPaths = {
   dashboard: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h3A2.5 2.5 0 0 1 12 5.5v3A2.5 2.5 0 0 1 9.5 11h-3A2.5 2.5 0 0 1 4 8.5v-3Zm8 0A2.5 2.5 0 0 1 14.5 3h3A2.5 2.5 0 0 1 20 5.5v1A2.5 2.5 0 0 1 17.5 9h-3A2.5 2.5 0 0 1 12 6.5v-1ZM4 15.5A2.5 2.5 0 0 1 6.5 13h3a2.5 2.5 0 0 1 2.5 2.5v3A2.5 2.5 0 0 1 9.5 21h-3A2.5 2.5 0 0 1 4 18.5v-3Zm8-2A2.5 2.5 0 0 1 14.5 11h3a2.5 2.5 0 0 1 2.5 2.5v5a2.5 2.5 0 0 1-2.5 2.5h-3a2.5 2.5 0 0 1-2.5-2.5v-5Z"/>',
@@ -24,864 +47,896 @@ const svgPaths = {
   figma: '<path d="M9.5 3h3A3.5 3.5 0 0 1 16 6.5 3.5 3.5 0 0 1 12.5 10h-3a3.5 3.5 0 1 1 0-7Zm0 7h3a3.5 3.5 0 1 1 0 7h-3v-7Zm0 7H12a3.5 3.5 0 1 1-2.5 1.05V17Zm-3-7h3v7h-3a3.5 3.5 0 1 1 0-7Zm0-7h3v7h-3a3.5 3.5 0 1 1 0-7Z"/>',
   document: '<path d="M7 3h6.8c.5 0 1 .2 1.4.6l3.2 3.2c.4.4.6.9.6 1.4V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 1.8V8h3.2L14 4.8ZM8 12a1 1 0 0 0 0 2h8a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2H8Z"/>',
   folder: '<path d="M4 7a3 3 0 0 1 3-3h3.3c.8 0 1.5.3 2.1.9l1.2 1.2c.2.2.4.3.7.3H17a3 3 0 0 1 3 3v7.1a3.5 3.5 0 0 1-3.5 3.5h-9A3.5 3.5 0 0 1 4 16.5V7Z"/>',
-  chart: '<path d="M6 13a2 2 0 0 1 2 2v4a2 2 0 1 1-4 0v-4a2 2 0 0 1 2-2Zm6-8a2 2 0 0 1 2 2v12a2 2 0 1 1-4 0V7a2 2 0 0 1 2-2Zm6 4a2 2 0 0 1 2 2v8a2 2 0 1 1-4 0v-8a2 2 0 0 1 2-2Z"/>',
   settings: '<path d="M10.8 2.5h2.4l.5 2a7.7 7.7 0 0 1 1.5.6l1.8-1.1 1.7 1.7-1.1 1.8c.3.5.5 1 .6 1.5l2 .5v2.4l-2 .5c-.1.5-.3 1-.6 1.5l1.1 1.8-1.7 1.7-1.8-1.1c-.5.3-1 .5-1.5.6l-.5 2h-2.4l-.5-2a7.7 7.7 0 0 1-1.5-.6L7 18.4l-1.7-1.7 1.1-1.8c-.3-.5-.5-1-.6-1.5l-2-.5v-2.4l2-.5c.1-.5.3-1 .6-1.5L5.3 5.7 7 4l1.8 1.1c.5-.3 1-.5 1.5-.6l.5-2ZM12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/>',
   search: '<path d="M10.5 4a6.5 6.5 0 0 1 5.1 10.5l3.2 3.2a1 1 0 0 1-1.4 1.4l-3.2-3.2A6.5 6.5 0 1 1 10.5 4Zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z"/>',
   bell: '<path d="M12 3a5 5 0 0 0-5 5v2.7c0 .7-.3 1.3-.7 1.8L5 13.8A2.5 2.5 0 0 0 6.8 18h10.4a2.5 2.5 0 0 0 1.8-4.2l-1.3-1.3c-.4-.5-.7-1.1-.7-1.8V8a5 5 0 0 0-5-5Zm-2.2 16a2.3 2.3 0 0 0 4.4 0H9.8Z"/>',
   plus: '<path d="M11 5a1 1 0 0 1 2 0v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5Z"/>',
-  arrow: '<path d="M13.3 5.3a1 1 0 0 1 1.4 0l5 5a1 1 0 0 1 0 1.4l-5 5a1 1 0 1 1-1.4-1.4L16.6 12H5a1 1 0 1 1 0-2h11.6l-3.3-3.3a1 1 0 0 1 0-1.4Z"/>',
   star: '<path d="M10.9 3.7a1.2 1.2 0 0 1 2.2 0l1.8 3.7 4.1.6a1.2 1.2 0 0 1 .7 2l-3 2.9.7 4.1a1.2 1.2 0 0 1-1.7 1.3L12 16.4l-3.7 1.9A1.2 1.2 0 0 1 6.6 17l.7-4.1-3-2.9A1.2 1.2 0 0 1 5 8l4.1-.6 1.8-3.7Z"/>',
 };
 
-function icon(name, className = "") {
-  return `<svg class="ui-icon ${className}" viewBox="0 0 24 24" aria-hidden="true">${svgPaths[name] || svgPaths.dashboard}</svg>`;
-}
-
-const navItems = [
-  ["dashboard", "Dashboard", "dashboard"],
-  ["work", "My Work List", "work"],
-  ["projects", "Projects", "projects"],
-  ["tasks", "My Tasks", "tasks"],
-  ["team", "Team", "team"],
-  ["qa", "Review Hub / QA", "qa"],
-  ["figma", "Figma Work", "figma"],
-  ["docs", "Docs", "docs"],
-  ["files", "Files / Deliverables", "files"],
-  ["reports", "Reports", "reports"],
-  ["settings", "Settings", "settings"],
-];
-
-const users = [
-  { id: "u1", name: "Hamza Khan", email: "hamza@beenco.io", role: "Product Lead", department: "Management", status: "Active", avatar: "HK" },
-  { id: "u2", name: "Ayesha Noor", email: "ayesha@beenco.io", role: "UI/UX Designer", department: "UI/UX", status: "Active", avatar: "AN" },
-  { id: "u3", name: "Bilal Raza", email: "bilal@beenco.io", role: "Web3 Developer", department: "Development", status: "Active", avatar: "BR" },
-  { id: "u4", name: "Mira Shah", email: "mira@beenco.io", role: "Content Strategist", department: "Content", status: "Active", avatar: "MS" },
-  { id: "u5", name: "Omar Ali", email: "omar@beenco.io", role: "QA Reviewer", department: "QA", status: "Active", avatar: "OA" },
-];
-
-const projects = [
-  {
-    id: "p1",
-    name: "NexaChain Launch Site",
-    clientName: "NexaChain",
-    description: "Web3 landing page, pitch visuals, and launch delivery package.",
-    ownerId: "u1",
-    teamMembers: ["u1", "u2", "u3", "u4", "u5"],
-    status: "In QA",
-    priority: "Critical",
-    tags: ["Web3", "Landing Page", "QA Required"],
-    startDate: "2026-05-01",
-    dueDate: "2026-05-18",
-    progress: 74,
-  },
-  {
-    id: "p2",
-    name: "Orbit DAO Brand Kit",
-    clientName: "Orbit DAO",
-    description: "Brand system, social templates, and creative guideline docs.",
-    ownerId: "u2",
-    teamMembers: ["u1", "u2", "u4"],
-    status: "In Review",
-    priority: "High",
-    tags: ["Branding", "Social Post", "Final Files"],
-    startDate: "2026-05-04",
-    dueDate: "2026-05-24",
-    progress: 58,
-  },
-  {
-    id: "p3",
-    name: "BeeLabs Dashboard",
-    clientName: "Internal",
-    description: "Internal analytics UI screens and export-ready dashboard frames.",
-    ownerId: "u1",
-    teamMembers: ["u1", "u2", "u3", "u5"],
-    status: "In Progress",
-    priority: "Medium",
-    tags: ["Dashboard", "UI", "Development"],
-    startDate: "2026-05-08",
-    dueDate: "2026-06-02",
-    progress: 36,
-  },
-];
-
-const tasks = [
-  {
-    id: "t1",
-    projectId: "p1",
-    title: "QA launch hero Figma frames",
-    description: "Check desktop, tablet, mobile frame sizes, copy alignment, and CTA states before export.",
-    assigneeId: "u5",
-    reviewerId: "u1",
-    status: "In QA",
-    priority: "Critical",
-    taskType: "QA Fix",
-    tags: ["Web3", "QA Required", "Landing Page"],
-    dueDate: "2026-05-15",
-    figmaWorkId: "f1",
-    checklist: ["Verify 1440 hero", "Check 390 mobile", "Confirm export notes"],
-    mentions: ["u1"],
-    starUserIds: ["u1"],
-    completed: false,
-  },
-  {
-    id: "t2",
-    projectId: "p1",
-    title: "Finalize token utility section copy",
-    description: "Tighten the section copy and add the final CTA angle for investor audience.",
-    assigneeId: "u4",
-    reviewerId: "u1",
-    status: "Changes Required",
-    priority: "Urgent",
-    taskType: "Content",
-    tags: ["Content", "Client Feedback", "Urgent"],
-    dueDate: "2026-05-16",
-    checklist: ["Update headline", "Add key points", "Link final copy doc"],
-    mentions: ["u1", "u4"],
-    starUserIds: [],
-    completed: false,
-  },
-  {
-    id: "t3",
-    projectId: "p2",
-    title: "Export social launch kit v2",
-    description: "Prepare square, portrait, and story exports with clean file names and source links.",
-    assigneeId: "u2",
-    reviewerId: "u5",
-    status: "Ready for QA",
-    priority: "High",
-    taskType: "Social Post",
-    tags: ["Final Files", "Social Post", "Branding"],
-    dueDate: "2026-05-17",
-    figmaWorkId: "f2",
-    checklist: ["1080x1080", "1080x1350", "1080x1920"],
-    mentions: [],
-    starUserIds: ["u1", "u2"],
-    completed: false,
-  },
-  {
-    id: "t4",
-    projectId: "p3",
-    title: "Build dashboard stats cards",
-    description: "Implement compact task, project, QA, and delivery metrics with loading states.",
-    assigneeId: "u3",
-    reviewerId: "u1",
-    status: "In Progress",
-    priority: "Medium",
-    taskType: "Development",
-    tags: ["Dashboard", "Development"],
-    dueDate: "2026-05-22",
-    checklist: ["Create cards", "Wire sample data", "Responsive tablet state"],
-    mentions: ["u1"],
-    starUserIds: [],
-    completed: false,
-  },
-  {
-    id: "t5",
-    projectId: "p1",
-    title: "Prepare final delivery folder",
-    description: "Collect final Figma URL, export ZIP, delivery notes, and QA approval record.",
-    assigneeId: "u1",
-    reviewerId: "u5",
-    status: "Ready for Delivery",
-    priority: "High",
-    taskType: "Final Delivery",
-    tags: ["Final Files", "Internal"],
-    dueDate: "2026-05-18",
-    checklist: ["Cloud folder", "Version labels", "Delivery notes"],
-    mentions: [],
-    starUserIds: ["u1"],
-    completed: false,
-  },
-  {
-    id: "t6",
-    projectId: "p2",
-    title: "Publish brand guideline doc",
-    description: "Move approved usage rules, logo spacing, and typography notes into docs.",
-    assigneeId: "u2",
-    reviewerId: "u1",
-    status: "Completed",
-    priority: "Low",
-    taskType: "Brand Design",
-    tags: ["Branding", "Docs"],
-    dueDate: "2026-05-12",
-    checklist: ["Logo rules", "Color tokens", "Export PDF"],
-    mentions: [],
-    starUserIds: [],
-    completed: true,
-    completedAt: "2026-05-13",
-    completedBy: "u2",
-  },
-];
-
-const figmaWork = [
-  { id: "f1", projectId: "p1", taskId: "t1", figmaFileName: "NexaChain Launch v4", figmaUrl: "#", pageName: "QA Frames", frameName: "Hero Desktop Final", width: 1440, height: 900, aspectRatio: "16:10", platform: "Website", version: "v4", status: "Ready for Review", designerId: "u2", reviewerId: "u5", notes: "Open in Figma. Dashboard only stores metadata and lightweight preview." },
-  { id: "f2", projectId: "p2", taskId: "t3", figmaFileName: "Orbit DAO Social Kit", figmaUrl: "#", pageName: "Exports", frameName: "IG Portrait Final", width: 1080, height: 1350, aspectRatio: "4:5", platform: "Instagram", version: "v2", status: "Changes Required", designerId: "u2", reviewerId: "u5", notes: "Check safe area and crop marks." },
-];
-
-const docs = [
-  { id: "d1", title: "NexaChain Delivery SOP", category: "Delivery SOP", ownerId: "u1", projectId: "p1", tags: ["Delivery", "QA"], lastUpdated: "2026-05-15", content: "Final delivery checklist, version labels, approval rules, and client handoff notes." },
-  { id: "d2", title: "Orbit DAO Brand Guidelines", category: "Brand Guidelines", ownerId: "u2", projectId: "p2", tags: ["Branding", "Design"], lastUpdated: "2026-05-13", content: "Logo usage, typography, social composition, and export requirements." },
-  { id: "d3", title: "Content Voice Rules", category: "Content Guidelines", ownerId: "u4", projectId: null, tags: ["Content", "Internal"], lastUpdated: "2026-05-11", content: "Tone, CTA structures, Web3 clarity rules, and review checklist." },
-];
-
-const files = [
-  { id: "file1", projectId: "p1", taskId: "t5", fileName: "nexachain-final-export.zip", fileType: "ZIP Folder", fileSize: "2.4 GB", fileUrl: "#", version: "Final Approved", status: "QA Review", uploadedBy: "u1", notes: "Stored as external cloud link." },
-  { id: "file2", projectId: "p2", taskId: "t3", fileName: "orbit-social-kit-v2", fileType: "External Link", fileSize: "Drive", fileUrl: "#", version: "v2", status: "Internal Review", uploadedBy: "u2", notes: "Contains PNG and Figma source." },
-  { id: "file3", projectId: "p1", taskId: "t2", fileName: "token-utility-copy.doc", fileType: "Document", fileSize: "240 KB", fileUrl: "#", version: "v3", status: "Draft", uploadedBy: "u4", notes: "Needs final review." },
-];
-
-const qaIssues = [
-  { id: "q1", taskId: "t1", title: "Mobile hero CTA too close to safe area", description: "390x844 frame needs 24px bottom spacing before export.", issueType: "Mobile Issue", priority: "Critical", status: "Open", assignedTo: "u2", createdBy: "u5" },
-  { id: "q2", taskId: "t3", title: "Portrait export missing v2 badge", description: "Add version marker and re-export PNG.", issueType: "Export Issue", priority: "High", status: "Rechecking", assignedTo: "u2", createdBy: "u5" },
-  { id: "q3", taskId: "t2", title: "CTA copy does not match approved angle", description: "Use client-approved investor language from comment thread.", issueType: "Text Issue", priority: "Urgent", status: "In Progress", assignedTo: "u4", createdBy: "u1" },
-];
-
-const reminders = [
-  { id: "r1", taskId: "t5", userId: "u1", reminderDate: "2026-05-16", reminderTime: "16:30", reminderNote: "Confirm final cloud folder permissions.", status: "Active" },
-  { id: "r2", taskId: "t1", userId: "u1", reminderDate: "2026-05-16", reminderTime: "11:00", reminderNote: "Review QA notes after fixes.", status: "Active" },
-];
-
-const notifications = [
-  { id: "n1", userId: "u1", type: "Mention", title: "You were mentioned in QA launch hero Figma frames", unread: true },
-  { id: "n2", userId: "u1", type: "Reminder", title: "Final delivery folder reminder today", unread: true },
-  { id: "n3", userId: "u1", type: "QA", title: "Token utility copy needs changes", unread: false },
-];
-
-const activity = [
-  "Task moved to In QA by Omar",
-  "Hamza was mentioned in a comment",
-  "Figma frame Hero Desktop Final linked",
-  "QA issue opened for mobile spacing",
-  "Delivery package checklist updated",
-];
-
-const state = {
-  view: "dashboard",
-  selectedTaskId: "t1",
-  search: "",
-};
-
 const $ = (selector) => document.querySelector(selector);
-const userById = (id) => users.find((user) => user.id === id) || users[0];
-const projectById = (id) => projects.find((project) => project.id === id) || projects[0];
-const taskById = (id) => tasks.find((task) => task.id === id) || tasks[0];
-const formatDate = (date) => new Date(`${date}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-const isOverdue = (task) => !task.completed && new Date(`${task.dueDate}T23:59:59`) < new Date("2026-05-16T23:59:59");
+const uid = (prefix) => `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const tomorrowISO = () => new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+const icon = (name) => `<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">${svgPaths[name] || svgPaths.dashboard}</svg>`;
+const escapeHtml = (value = "") => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
 
-function statusClass(status) {
-  const value = status.toLowerCase();
-  if (value.includes("qa")) return "qa";
-  if (value.includes("review") || value.includes("rechecking")) return "review";
-  if (value.includes("changes") || value.includes("overdue")) return "changes";
-  if (value.includes("approved") || value.includes("delivered") || value.includes("completed")) return "approved";
-  return "";
-}
-
-function priorityClass(priority) {
-  return priority.toLowerCase();
-}
-
-function statusPill(status) {
-  return `<span class="status ${statusClass(status)}">${status}</span>`;
-}
-
-function priorityBadge(priority) {
-  return `<span class="priority ${priorityClass(priority)}">${priority}</span>`;
-}
-
-function tagChips(tags) {
-  return tags.map((tag) => `<span class="tag">${tag}</span>`).join("");
-}
-
-function avatarStack(ids) {
-  return `<div class="avatar-stack">${ids.slice(0, 4).map((id) => `<span title="${userById(id).name}">${userById(id).avatar}</span>`).join("")}</div>`;
-}
-
-function taskScore(task) {
-  const priorityScore = { Critical: 100, Urgent: 90, High: 70, Medium: 45, Low: 20 }[task.priority] || 0;
-  const overdueScore = isOverdue(task) ? 80 : 0;
-  const todayScore = task.dueDate === "2026-05-16" ? 60 : 0;
-  const mentionScore = task.mentions.includes(currentUserId) ? 35 : 0;
-  return priorityScore + overdueScore + todayScore + mentionScore;
-}
-
-function getMyWork() {
-  return tasks
-    .filter((task) => task.assigneeId === currentUserId || task.reviewerId === currentUserId || task.mentions.includes(currentUserId) || task.starUserIds.includes(currentUserId))
-    .sort((a, b) => taskScore(b) - taskScore(a));
-}
-
-function matchesSearch(item, fields) {
-  if (!state.search.trim()) return true;
-  const query = state.search.trim().toLowerCase();
-  return fields.some((field) => String(item[field] || "").toLowerCase().includes(query));
-}
-
-function emptyState(label) {
-  return `<div class="empty-state">${label}</div>`;
-}
-
-function renderShell() {
-  const app = $("#app");
-  app.innerHTML = `
-    <div class="app-shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="brand-mark">B</div>
-          <div>
-            <strong>BeeFlow</strong>
-            <span>Beenco workflow OS</span>
-          </div>
-        </div>
-        <div class="sidebar-search">${icon("search")}<span>Search workspace...</span></div>
-        <nav class="nav">
-          <div class="nav-section">Workspace</div>
-          ${navItems.slice(0, 8).map(navButton).join("")}
-          <div class="nav-section">Operate</div>
-          ${navItems.slice(8).map(navButton).join("")}
-        </nav>
-        <div class="sidebar-footer">
-          <div class="focus-card">
-            <strong>Daily focus</strong>
-            <p>${getMyWork().length} active items need your attention across QA, delivery, mentions, and starred work.</p>
-            <button class="primary-btn" data-view="work">Open My Work</button>
-          </div>
-          <div class="user-chip">
-            <div class="avatar">${userById(currentUserId).avatar}</div>
-            <div>
-              <strong>${userById(currentUserId).name}</strong><br />
-              <small>${userById(currentUserId).email}</small>
-            </div>
-          </div>
-        </div>
-      </aside>
-      <main class="main">
-        <header class="topbar">
-          <label class="searchbar">
-            ${icon("search")}
-            <input id="globalSearch" value="${state.search}" placeholder="Search tasks, projects, docs, files..." />
-          </label>
-          <div class="top-actions">
-            <button class="icon-btn" title="Notifications">${icon("bell")}</button>
-            <button class="ghost-btn" data-view="qa">QA Hub</button>
-            <button class="primary-btn" data-view="tasks">${icon("plus")} New Task</button>
-          </div>
-        </header>
-        <section id="view"></section>
-      </main>
-    </div>
-  `;
-  bindShellEvents();
-  renderView();
-}
-
-function navButton([view, label, iconKey]) {
-  return `
-    <button class="nav-item ${state.view === view ? "active" : ""}" data-view="${view}">
-      <span class="nav-icon">${icon(icons[iconKey])}</span>
-      <span class="nav-label">${label}</span>
-    </button>
-  `;
-}
-
-function bindShellEvents() {
-  document.querySelectorAll("[data-view]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.view = button.dataset.view;
-      renderShell();
-    });
-  });
-
-  $("#globalSearch").addEventListener("input", (event) => {
-    state.search = event.target.value;
-    renderView();
-  });
-}
-
-function viewHeader(title, subtitle, actions = "", summary = "") {
-  return `
-    <div class="hero-panel">
-      <div class="view-header ${summary ? "" : "single"}">
-        <div>
-          <span class="eyebrow">Beenco daily ops</span>
-          <h1>${title}</h1>
-          <p>${subtitle}</p>
-          <div class="hero-actions" style="margin-top:20px">${actions}</div>
-        </div>
-        ${summary ? `<div class="hero-summary">${summary}</div>` : ""}
-      </div>
-    </div>
-  `;
-}
-
-function summaryItem(label, value) {
-  return `<div class="summary-item"><small>${label}</small><strong>${value}</strong></div>`;
-}
-
-function metricCard(label, value, progress) {
-  return `
-    <div class="metric-card">
-      <small>${label}</small>
-      <strong>${value}</strong>
-      <div class="mini-progress"><span style="width:${progress}%"></span></div>
-    </div>
-  `;
-}
-
-function taskRow(task) {
-  const project = projectById(task.projectId);
-  return `
-    <article class="task-row" data-task="${task.id}">
-      <button class="star ${task.starUserIds.includes(currentUserId) ? "active" : ""}" data-star="${task.id}" title="Star task">${icon("star")}</button>
-      <div>
-        <div class="task-title">
-          ${task.title}
-          ${statusPill(task.status)}
-          ${priorityBadge(task.priority)}
-          ${task.mentions.includes(currentUserId) ? `<span class="status review">Unread mention</span>` : ""}
-        </div>
-        <div class="task-meta">
-          <span>${project.name}</span>
-          <span>${task.taskType}</span>
-          <span>${isOverdue(task) ? "Overdue" : "Due"} ${formatDate(task.dueDate)}</span>
-          <span>Reviewer: ${userById(task.reviewerId).name}</span>
-        </div>
-      </div>
-      <div>${tagChips(task.tags.slice(0, 2))}</div>
-    </article>
-  `;
-}
-
-function taskCard(task) {
-  return `
-    <article class="task-card" draggable="true" data-task="${task.id}">
-      <div>${priorityBadge(task.priority)}</div>
-      <h3>${task.title}</h3>
-      <p>${task.description}</p>
-      <div class="card-footer">
-        ${avatarStack([task.assigneeId, task.reviewerId])}
-        <span>${formatDate(task.dueDate)}</span>
-      </div>
-    </article>
-  `;
-}
-
-function renderDashboard() {
-  const myWork = getMyWork().filter((task) => matchesSearch(task, ["title", "description", "taskType", "status", "priority"]));
-  const dueToday = tasks.filter((task) => task.dueDate === "2026-05-16" && !task.completed);
-  const overdue = tasks.filter(isOverdue);
-  const qa = tasks.filter((task) => task.status.includes("QA") || task.status.includes("Changes"));
-  return `
-    ${viewHeader(
-      "BeeFlow keeps agency work readable.",
-      "A dark, quiet workflow space for Beenco projects, tasks, Figma frames, content briefs, QA review, files, docs, reminders, and final delivery. Built to show what matters now without pushing every detail into your face.",
-      `<button class="primary-btn" data-view="work">Open My Work</button><button class="ghost-btn" data-view="qa">Review QA</button><button class="ghost-btn" data-view="figma">Figma Work</button>`,
-      `${summaryItem("Today", `${dueToday.length} due`)}${summaryItem("QA lane", `${qa.length} items`)}${summaryItem("Delivery", `${tasks.filter((task) => task.status === "Ready for Delivery").length} ready`)}`
-    )}
-    <section class="landing-section">
-      <div class="panel-title"><h2>Daily signal</h2><span class="status">Small numbers, clear action</span></div>
-      <p class="section-copy">The top layer stays intentionally light: a few counters, a clear work queue, and enough context to decide the next move. Heavy files, full Figma embeds, and noisy charts stay out of the dashboard.</p>
-      <div class="grid metrics-grid">
-      ${metricCard("My tasks", myWork.length, 78)}
-      ${metricCard("Due today", dueToday.length, 42)}
-      ${metricCard("Overdue", overdue.length, 28)}
-      ${metricCard("Tasks in QA", qa.length, 64)}
-      </div>
-    </section>
-    <section class="landing-section">
-      <div class="panel-title"><h2>Core workflow</h2><span class="status approved">Delivery path</span></div>
-      <p class="section-copy">BeeFlow follows the actual agency path from project setup to task execution, creative/content work, QA changes, approval, and final delivery.</p>
-      <div class="showcase-grid">
-        <article class="workflow-step showcase-card large">
-          <span>${icon("grid")}</span>
-          <strong>Build workflows that match Beenco.</strong>
-          <p>Projects, tasks, creative briefs, content work, reminders, Figma frames, QA checks, and delivery links live in one calm operating space. The goal is not more software noise. The goal is knowing what should move next.</p>
-        </article>
-        <div class="showcase-stack">
-          <article class="workflow-step showcase-card">
-            <span>${icon("shieldCheck")}</span>
-            <strong>Review work before it ships.</strong>
-            <p>Move work through Ready for QA, In QA, Changes Required, Rechecking, Approved, and Ready for Delivery with clear owners and issue notes.</p>
-          </article>
-          <article class="workflow-step showcase-card">
-            <span>${icon("folder")}</span>
-            <strong>Keep heavy files lightweight.</strong>
-            <p>Store file metadata, Figma frame specs, external links, versions, sizes, ratios, and final delivery status without loading huge assets on the dashboard.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-    <div class="grid workspace-grid">
-      <section class="content-panel">
-        <div class="panel-title">
-          <h2>Highest priority now</h2>
-          <button class="ghost-btn" data-view="work">View all</button>
-        </div>
-        <div class="filter-bar">
-          <span class="filter-chip">Critical first</span>
-          <span class="filter-chip">Overdue</span>
-          <span class="filter-chip">Mentioned</span>
-          <span class="filter-chip">QA waiting</span>
-          <span class="filter-chip">Final delivery</span>
-        </div>
-        <div class="task-list">${myWork.slice(0, 6).map(taskRow).join("") || emptyState("No matching focus items.")}</div>
-      </section>
-      ${renderDetailPanel()}
-    </div>
-    <div class="grid two-col">
-      <section class="content-panel">
-        <div class="panel-title"><h2>Active projects</h2><button class="ghost-btn" data-view="projects">Open projects</button></div>
-        <div class="grid">${projects.map(projectCard).join("")}</div>
-      </section>
-      <section class="content-panel">
-        <div class="panel-title"><h2>Notifications</h2><span class="status review">${notifications.filter((item) => item.unread).length} unread</span></div>
-        <div class="task-list">${notifications.map((item) => `<article class="task-row"><div class="star ${item.unread ? "active" : ""}">${icon("bell")}</div><div><div class="task-title">${item.title}</div><div class="task-meta">${item.type}</div></div><span class="status">${item.unread ? "Unread" : "Read"}</span></article>`).join("")}</div>
-      </section>
-    </div>
-    <section class="landing-section">
-      <div class="panel-title"><h2>Operating areas</h2><span class="status">MVP ready</span></div>
-      <p class="section-copy">Each area is kept narrow and practical. The product should feel like a daily operating system, not a crowded SaaS template.</p>
-      <div class="grid three-col">
-        ${[
-          ["My Work List", "One personal queue for assigned tasks, mentions, starred tasks, reviews, rework, and delivery follow-ups."],
-          ["Figma Work", "File names, frame names, ratios, sizes, versions, designers, reviewers, and links without loading heavy files."],
-          ["QA Hub", "A dedicated place for issues, screenshots, priorities, rechecking, approvals, and delivery readiness."],
-          ["Docs", "Guidelines, SOPs, reusable briefs, client notes, content rules, and QA checklists."],
-          ["Files", "External links, versions, sizes, owners, notes, statuses, and final approved packages."],
-          ["Team", "Roles, departments, workload, active tasks, assigned projects, and completion history."]
-        ].map(([title, copy]) => `<article class="feature-card"><span class="tag">BeeFlow</span><h3>${title}</h3><p>${copy}</p></article>`).join("")}
-      </div>
-    </section>
-  `;
-}
-
-function renderMyWork() {
-  const work = getMyWork().filter((task) => matchesSearch(task, ["title", "description", "taskType", "status", "priority"]));
-  return `
-    ${viewHeader(
-      "My Work List",
-      "Automatically sorted around what matters now: critical priority, overdue items, due today, fresh mentions, starred tasks, QA reviews, and rework.",
-      `<button class="ghost-btn">Add reminder</button><button class="primary-btn">Move selected to QA</button>`
-    )}
-    <div class="grid workspace-grid">
-      <section class="content-panel">
-        <div class="panel-title"><h2>Work sorted by urgency</h2><span class="status">${work.length} items</span></div>
-        <div class="filter-bar">
-          <span class="filter-chip">Assigned to me</span>
-          <span class="filter-chip">Reviewer</span>
-          <span class="filter-chip">Mentioned</span>
-          <span class="filter-chip">Starred</span>
-          <span class="filter-chip">Needs rework</span>
-          <span class="filter-chip">Ready for delivery</span>
-        </div>
-        <div class="task-list">${work.map(taskRow).join("") || emptyState("No matching work items.")}</div>
-      </section>
-      ${renderDetailPanel()}
-    </div>
-  `;
-}
-
-function renderTasks() {
-  const visibleTasks = tasks.filter((task) => matchesSearch(task, ["title", "description", "taskType", "status", "priority"]));
-  const lanes = ["Backlog", "In Progress", "Ready for QA", "In QA", "Changes Required", "Ready for Delivery"];
-  const laneTasks = {
-    Backlog: visibleTasks.filter((task) => task.status === "Backlog" || task.status === "To Do"),
-    "In Progress": visibleTasks.filter((task) => task.status === "In Progress"),
-    "Ready for QA": visibleTasks.filter((task) => task.status === "Ready for QA"),
-    "In QA": visibleTasks.filter((task) => task.status === "In QA" || task.status === "Rechecking"),
-    "Changes Required": visibleTasks.filter((task) => task.status === "Changes Required"),
-    "Ready for Delivery": visibleTasks.filter((task) => task.status === "Ready for Delivery"),
+function defaultState() {
+  return {
+    meta: { isAuthenticated: false, pendingEmail: "", verificationCode: "", verificationSent: false, loginError: "", role: "", workspaceName: "", departments: [], activeView: "dashboard", search: "", selectedTaskId: "", qaTab: "Ready for QA", projectView: "list" },
+    currentUser: { id: "me", name: "", email: "", role: "", department: "", avatar: "" },
+    projects: [],
+    tasks: [],
+    team: [],
+    tags: [],
+    docs: [],
+    files: [],
+    deliveries: [],
+    figma: [],
+    qaIssues: [],
+    reminders: [],
+    notifications: [],
+    activity: [],
   };
-  return `
-    ${viewHeader(
-      "My Tasks",
-      "List and board views for task assignment, QA movement, reminders, Figma links, creative specs, content briefs, and completed history.",
-      `<button class="ghost-btn">List View</button><button class="primary-btn">Board View</button>`
-    )}
-    <section class="content-panel">
-      <div class="panel-title"><h2>Kanban workflow</h2><span class="status">Drag cards between lanes</span></div>
-      <div class="filter-bar">
-        <span class="filter-chip">Assignee</span><span class="filter-chip">Project</span><span class="filter-chip">Status</span><span class="filter-chip">Priority</span><span class="filter-chip">Task type</span><span class="filter-chip">Starred</span>
-      </div>
-      <div class="kanban">
-        ${lanes.map((lane, index) => `
-          <div class="kanban-column" data-lane="${lane}">
-            <div class="kanban-head"><strong><span class="lane-dot"></span>${lane}</strong><span>${laneTasks[lane].length}</span></div>
-            ${laneTasks[lane].map(taskCard).join("") || emptyState("No tasks here")}
-          </div>
-        `).join("")}
-      </div>
-    </section>
-  `;
 }
 
-function renderProjects() {
-  const visibleProjects = projects.filter((project) => matchesSearch(project, ["name", "description", "clientName", "status", "priority"]));
-  return `
-    ${viewHeader("Projects", "Project records connect client work, team ownership, Figma files, docs, delivery links, activity, priority, status, and progress.", `<button class="primary-btn">New Project</button>`)}
-    <section class="content-panel">
-      <div class="panel-title"><h2>Project portfolio</h2><span class="status">${projects.length} active</span></div>
-      <div class="grid three-col">${visibleProjects.map(projectCard).join("") || emptyState("No matching projects.")}</div>
-    </section>
-  `;
+let state = loadState();
+let modal = null;
+let drawerTaskId = "";
+let toast = "";
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return defaultState();
+    const parsed = JSON.parse(saved);
+    const base = defaultState();
+    return { ...base, ...parsed, meta: { ...base.meta, ...(parsed.meta || {}) }, currentUser: { ...base.currentUser, ...(parsed.currentUser || {}) } };
+  } catch {
+    return defaultState();
+  }
 }
 
-function projectCard(project) {
-  return `
-    <article class="project-card">
-      <div>${statusPill(project.status)} ${priorityBadge(project.priority)}</div>
-      <h3>${project.name}</h3>
-      <p>${project.description}</p>
-      <div class="task-meta">
-        <span>${project.clientName}</span>
-        <span>Due ${formatDate(project.dueDate)}</span>
-      </div>
-      <div class="mini-progress" style="margin:14px 0 12px"><span style="width:${project.progress}%"></span></div>
-      <div class="card-footer">${avatarStack(project.teamMembers)}<strong>${project.progress}%</strong></div>
-    </article>
-  `;
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-function renderTeam() {
-  return `
-    ${viewHeader("Team", "A simple team area for roles, departments, workload, assigned projects, active tasks, completed tasks, and availability.", `<button class="primary-btn">Invite Member</button>`)}
-    <section class="content-panel">
-      <div class="panel-title"><h2>Members</h2><span class="status">Active team</span></div>
-      <div class="grid three-col">
-        ${users.map((user) => {
-          const activeTasks = tasks.filter((task) => task.assigneeId === user.id && !task.completed).length;
-          const completed = tasks.filter((task) => task.completedBy === user.id).length;
-          return `<article class="team-card">
-            <div class="avatar">${user.avatar}</div>
-            <h3>${user.name}</h3>
-            <p>${user.role} · ${user.department}</p>
-            <div class="info-line"><span>Active tasks</span><strong>${activeTasks}</strong></div>
-            <div class="info-line"><span>Completed</span><strong>${completed}</strong></div>
-            <div class="info-line"><span>Status</span><strong>${user.status}</strong></div>
-          </article>`;
-        }).join("")}
-      </div>
-    </section>
-  `;
+function setView(view) {
+  state.meta.activeView = view;
+  saveState();
+  render();
 }
 
-function renderQA() {
-  const visibleIssues = qaIssues.filter((issue) => matchesSearch(issue, ["title", "description", "issueType", "priority", "status"]));
-  return `
-    ${viewHeader("Review Hub / QA", "The approval lane before final delivery: Ready for QA, In QA, Changes Required, Rechecking, Approved, and Ready for Delivery.", `<button class="ghost-btn">QA Board</button><button class="primary-btn">Log Issue</button>`)}
-    <section class="content-panel">
-      <div class="panel-title"><h2>QA issues</h2><span class="status qa">${qaIssues.length} tracked</span></div>
-      <div class="grid three-col">
-        ${visibleIssues.map((issue) => {
-          const task = taskById(issue.taskId);
-          return `<article class="qa-card">
-            <div>${statusPill(issue.status)} ${priorityBadge(issue.priority)}</div>
-            <h3>${issue.title}</h3>
-            <p>${issue.description}</p>
-            <div class="task-meta"><span>${issue.issueType}</span><span>${task.title}</span><span>${userById(issue.assignedTo).name}</span></div>
-          </article>`;
-        }).join("") || emptyState("No matching QA issues.")}
-      </div>
-    </section>
-  `;
+function notify(title, taskId = "") {
+  state.notifications.unshift({ id: uid("notification"), title, taskId, read: false, createdAt: new Date().toISOString() });
 }
 
-function renderFigma() {
-  const visibleFigma = figmaWork.filter((item) => matchesSearch(item, ["figmaFileName", "pageName", "frameName", "aspectRatio", "platform", "status"]));
-  return `
-    ${viewHeader("Figma Work", "Lightweight Figma management for file links, frames, sizes, ratios, versions, designers, reviewers, and status without loading heavy files in the dashboard.", `<button class="primary-btn">Attach Figma Link</button>`)}
-    <section class="content-panel">
-      <div class="panel-title"><h2>Figma frames</h2><span class="status">Metadata only</span></div>
-      <div class="grid two-col">
-        ${visibleFigma.map((item) => `<article class="figma-card">
-          <div>${statusPill(item.status)} <span class="tag">${item.version}</span></div>
-          <h3>${item.figmaFileName}</h3>
-          <p>${item.notes}</p>
-          <div class="info-line"><span>Frame</span><strong>${item.frameName}</strong></div>
-          <div class="info-line"><span>Size</span><strong>${item.width} x ${item.height}</strong></div>
-          <div class="info-line"><span>Ratio</span><strong>${item.aspectRatio}</strong></div>
-          <div class="info-line"><span>Designer</span><strong>${userById(item.designerId).name}</strong></div>
-        </article>`).join("") || emptyState("No matching Figma work.")}
-      </div>
-    </section>
-  `;
+function logActivity(message, taskId = "") {
+  state.activity.unshift({ id: uid("activity"), message, taskId, createdAt: new Date().toISOString() });
 }
 
-function renderDocs() {
-  const visibleDocs = docs.filter((doc) => matchesSearch(doc, ["title", "category", "content", "lastUpdated"]));
-  return `
-    ${viewHeader("Docs", "Internal documentation for brand guidelines, content rules, QA checklists, client notes, project instructions, delivery SOPs, and reusable briefs.", `<button class="primary-btn">New Doc</button>`)}
-    <section class="content-panel">
-      <div class="panel-title"><h2>Knowledge base</h2><span class="status">${docs.length} docs</span></div>
-      <div class="grid three-col">
-        ${visibleDocs.map((doc) => `<article class="doc-card">
-          <span class="status">${doc.category}</span>
-          <h3>${doc.title}</h3>
-          <p>${doc.content}</p>
-          <div class="task-meta"><span>${userById(doc.ownerId).name}</span><span>Updated ${formatDate(doc.lastUpdated)}</span></div>
-          <div style="margin-top:12px">${tagChips(doc.tags)}</div>
-        </article>`).join("") || emptyState("No matching docs.")}
-      </div>
-    </section>
-  `;
+function userOptions(selected = "") {
+  const people = [state.currentUser, ...state.team];
+  return `<option value="">Unassigned</option>${people.map((user) => `<option value="${user.id}" ${selected === user.id ? "selected" : ""}>${escapeHtml(user.name || user.email || "Unnamed")}</option>`).join("")}`;
 }
 
-function renderFiles() {
-  const visibleFiles = files.filter((file) => matchesSearch(file, ["fileName", "fileType", "fileSize", "version", "status"]));
-  return `
-    ${viewHeader("Files / Deliverables", "Fast metadata-first handling for large creative files, external folders, Figma source links, versions, status, owners, notes, and final delivery packages.", `<button class="primary-btn">Add Deliverable</button>`)}
-    <section class="content-panel">
-      <div class="panel-title"><h2>Deliverable tracker</h2><span class="status">No heavy previews</span></div>
-      <div class="task-list">
-        ${visibleFiles.map((file) => `<article class="file-row">
-          <strong>${file.fileName}</strong>
-          <span>${file.fileType}</span>
-          <span>${file.fileSize}</span>
-          <span>${file.version}</span>
-          ${statusPill(file.status)}
-        </article>`).join("") || emptyState("No matching deliverables.")}
-      </div>
-    </section>
-  `;
+function projectOptions(selected = "") {
+  return `<option value="">No project</option>${state.projects.map((project) => `<option value="${project.id}" ${selected === project.id ? "selected" : ""}>${escapeHtml(project.name)}</option>`).join("")}`;
 }
 
-function renderReports() {
-  return `
-    ${viewHeader("Reports", "Minimal reporting for workload, QA bottlenecks, overdue tasks, delivery readiness, and active project progress.", `<button class="primary-btn">Export Summary</button>`)}
-    <div class="grid metrics-grid">
-      ${metricCard("Active projects", projects.length, 66)}
-      ${metricCard("QA bottlenecks", qaIssues.filter((issue) => issue.status !== "Approved").length, 48)}
-      ${metricCard("Delivery pending", tasks.filter((task) => task.status === "Ready for Delivery").length, 30)}
-      ${metricCard("Completed history", tasks.filter((task) => task.completed).length, 22)}
+function taskOptions(selected = "") {
+  return `<option value="">No task</option>${state.tasks.map((task) => `<option value="${task.id}" ${selected === task.id ? "selected" : ""}>${escapeHtml(task.title)}</option>`).join("")}`;
+}
+
+function optionList(values, selected = "") {
+  return values.map((value) => `<option value="${value}" ${selected === value ? "selected" : ""}>${value}</option>`).join("");
+}
+
+function personName(id) {
+  if (!id) return "Unassigned";
+  const person = [state.currentUser, ...state.team].find((user) => user.id === id);
+  return person ? person.name || person.email || "Unnamed" : "Unknown";
+}
+
+function projectName(id) {
+  const project = state.projects.find((item) => item.id === id);
+  return project ? project.name : "No project";
+}
+
+function taskName(id) {
+  const task = state.tasks.find((item) => item.id === id);
+  return task ? task.title : "No task";
+}
+
+function isOverdue(task) {
+  return task.dueDate && task.status !== "Completed" && task.status !== "Delivered" && task.dueDate < todayISO();
+}
+
+function taskNeedsQA(task) {
+  return ["UI/UX Design", "Brand Design", "Landing Page", "Website Design", "Social Post", "Presentation", "Animation", "Video", "Content", "QA Fix", "Client Feedback", "Final Delivery"].includes(task.taskType);
+}
+
+function myWorkTasks() {
+  const priorityScore = { Critical: 80, Urgent: 70, High: 50, Medium: 20, Low: 10 };
+  return state.tasks
+    .filter((task) => task.assigneeId === "me" || task.reviewerId === "me" || task.mentionedUserIds?.includes("me") || task.starredBy?.includes("me") || isOverdue(task) || task.dueDate === todayISO() || ["Changes Required", "Ready for QA"].includes(task.status))
+    .sort((a, b) => {
+      const score = (task) =>
+        (priorityScore[task.priority] || 0) +
+        (isOverdue(task) ? 60 : 0) +
+        (task.dueDate === todayISO() ? 45 : 0) +
+        (task.mentionedUserIds?.includes("me") ? 30 : 0) +
+        (task.starredBy?.includes("me") ? 20 : 0);
+      return score(b) - score(a);
+    });
+}
+
+function setupSteps() {
+  return [
+    ["Create workspace", Boolean(state.meta.workspaceName), "workspace"],
+    ["Add department", state.meta.departments.length > 0, "department"],
+    ["Invite team members", state.team.length > 0, "team"],
+    ["Create first project", state.projects.length > 0, "project"],
+    ["Create first task", state.tasks.length > 0, "task"],
+  ];
+}
+
+function render() {
+  if (!state.meta.isAuthenticated) {
+    $("#app").innerHTML = renderLogin();
+    bindEvents();
+    return;
+  }
+
+  if (!state.meta.role) {
+    $("#app").innerHTML = renderRoleGate();
+    bindEvents();
+    return;
+  }
+
+  $("#app").innerHTML = `
+    <div class="app-shell">
+      ${renderSidebar()}
+      <main class="main">
+        ${renderTopbar()}
+        <section class="page fade-in">${renderView()}</section>
+      </main>
+      ${drawerTaskId ? renderTaskDrawer() : ""}
+      ${modal ? renderModal() : ""}
+      ${toast ? `<div class="toast">${escapeHtml(toast)}</div>` : ""}
     </div>
   `;
+  bindEvents();
 }
 
-function renderSettings() {
+function renderRoleGate() {
   return `
-    ${viewHeader("Settings", "Simple workspace controls for notification hygiene, departments, task types, tags, statuses, reminder defaults, and delivery rules.", `<button class="primary-btn">Save Settings</button>`)}
-    <section class="content-panel">
-      <div class="panel-title"><h2>Workspace setup</h2><span class="status">MVP</span></div>
-      <div class="grid two-col">
-        <div class="brief-box"><h4>Departments</h4><p>Design, UI/UX, Development, Web3, Content, Video, QA, Management</p></div>
-        <div class="brief-box"><h4>Task types</h4><p>UI/UX Design, Brand Design, Landing Page, Social Post, Development, Content, QA Fix, Final Delivery</p></div>
-        <div class="brief-box"><h4>Reminder defaults</h4><p>Today, tomorrow, before due date, and custom date/time.</p></div>
-        <div class="brief-box"><h4>Delete behavior</h4><p>Important records require confirmation and completed tasks stay in history.</p></div>
-      </div>
-    </section>
+    <main class="onboarding-screen">
+      <section class="onboarding-card fade-in">
+        <div class="brand-row"><span class="brand-mark">B</span><div><strong>BeeFlow</strong><small>${escapeHtml(state.currentUser.email)}</small></div></div>
+        <h1>Who are you?</h1>
+        <p>Choose your role so BeeFlow can shape your first workspace around the work you manage every day.</p>
+        <div class="role-grid">
+          ${roles.map((role) => `<button class="role-card" data-action="select-role" data-role="${role}">${role}</button>`).join("")}
+        </div>
+      </section>
+    </main>
   `;
 }
 
-function renderDetailPanel() {
-  const task = taskById(state.selectedTaskId);
-  const project = projectById(task.projectId);
-  const figma = figmaWork.find((item) => item.id === task.figmaWorkId);
-  const taskReminder = reminders.find((item) => item.taskId === task.id && item.userId === currentUserId);
+function renderLogin() {
+  const hasCode = Boolean(state.meta.pendingEmail && state.meta.verificationCode);
   return `
-    <aside class="detail-panel">
-      <div class="panel-title">
-        <h3>Selected task</h3>
-        <span class="status ${statusClass(task.status)}">${task.status}</span>
-      </div>
-      <h2 style="margin:0 0 8px">${task.title}</h2>
-      <p style="margin:0 0 14px;color:var(--muted);line-height:1.5">${task.description}</p>
-      <div class="info-list">
-        <div class="info-line"><span>Project</span><strong>${project.name}</strong></div>
-        <div class="info-line"><span>Assignee</span><strong>${userById(task.assigneeId).name}</strong></div>
-        <div class="info-line"><span>Reviewer</span><strong>${userById(task.reviewerId).name}</strong></div>
-        <div class="info-line"><span>Due date</span><strong>${formatDate(task.dueDate)}</strong></div>
-        <div class="info-line"><span>Type</span><strong>${task.taskType}</strong></div>
-      </div>
-      <div class="brief-box">
-        <h4>Task brief</h4>
-        <ul>
-          <li>Objective: complete the work with QA-ready output.</li>
-          <li>Required format: Figma source, final exports, and linked notes where needed.</li>
-          <li>Reviewer must approve before delivery.</li>
-        </ul>
-      </div>
-      ${figma ? `<div class="brief-box"><h4>Figma spec</h4><div class="info-line"><span>Frame</span><strong>${figma.frameName}</strong></div><div class="info-line"><span>Size</span><strong>${figma.width} x ${figma.height}</strong></div><div class="info-line"><span>Ratio</span><strong>${figma.aspectRatio}</strong></div></div>` : ""}
-      ${taskReminder ? `<div class="brief-box"><h4>Reminder</h4><p>${taskReminder.reminderDate} at ${taskReminder.reminderTime}: ${taskReminder.reminderNote}</p></div>` : ""}
-      <div class="brief-box">
-        <h4>Quick actions</h4>
-        <div class="filter-bar">
-          <span class="filter-chip">Star</span>
-          <span class="filter-chip">Reminder</span>
-          <span class="filter-chip">Move to QA</span>
-          <span class="filter-chip">Comment</span>
-          <span class="filter-chip">Attach link</span>
+    <main class="onboarding-screen">
+      <form class="onboarding-card fade-in" data-form="${hasCode ? "verifyLogin" : "login"}">
+        <div class="brand-row"><span class="brand-mark">B</span><div><strong>BeeFlow</strong><small>Verified workspace login</small></div></div>
+        <h1>${hasCode ? "Enter verification code" : "Login to BeeFlow"}</h1>
+        <p>${hasCode ? `We sent a one-time verification code to ${escapeHtml(state.meta.pendingEmail)}. Check your inbox and enter the code below.` : "Use your work email. BeeFlow will send a one-time code before opening the workspace."}</p>
+        ${state.meta.loginError ? `<div class="form-error">${escapeHtml(state.meta.loginError)}</div>` : ""}
+        ${hasCode ? `${field("code", "Verification code", "", "6 digit code", true, "text")}` : `${field("name", "Your name", state.currentUser.name, "Your name", true)}${field("email", "Work email", state.currentUser.email, "you@beenco.io", true, "email")}`}
+        <div class="modal-actions">
+          ${hasCode ? `<button type="button" class="secondary" data-action="restart-login">Use another email</button><button type="button" class="secondary" data-action="resend-code">Resend code</button>` : ""}
+          <button class="primary" type="submit">${hasCode ? "Verify and continue" : "Send verification code"}</button>
         </div>
-      </div>
-      <div class="brief-box">
-        <h4>Activity</h4>
-        <div class="activity">${activity.map((item) => `<div class="activity-item">${item}</div>`).join("")}</div>
+      </form>
+    </main>
+  `;
+}
+
+function renderSidebar() {
+  return `
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">B</span><div><strong>BeeFlow</strong><small>${escapeHtml(state.meta.workspaceName || "Setup workspace")}</small></div></div>
+      <nav class="nav">
+        ${navItems.map(([view, label, iconName]) => `<button class="nav-item ${state.meta.activeView === view ? "active" : ""}" data-view="${view}"><span>${icon(iconName)}</span>${label}</button>`).join("")}
+      </nav>
+      <div class="sidebar-footer">
+        <button class="profile-card" data-action="open-modal" data-modal="profile">
+          <span class="avatar mini">${escapeHtml(currentInitials())}</span>
+          <span><strong>${escapeHtml(state.currentUser.name || "Profile")}</strong><small>${escapeHtml(state.currentUser.email || "Add email")}</small></span>
+        </button>
+        <button class="secondary full" data-action="load-demo">Load demo workspace</button>
       </div>
     </aside>
   `;
 }
 
+function renderTopbar() {
+  const pageLabel = navItems.find(([view]) => view === state.meta.activeView)?.[1] || "Dashboard";
+  return `
+    <header class="topbar">
+      <div>
+        <h2>${pageLabel}</h2>
+        <p>${state.meta.workspaceName ? escapeHtml(state.meta.workspaceName) : "Finish setup to start managing work."}</p>
+      </div>
+      <label class="searchbar">${icon("search")}<input data-action="search" value="${escapeHtml(state.meta.search)}" placeholder="Search workspace" /></label>
+      <button class="primary" data-action="open-modal" data-modal="task">${icon("plus")} New Task</button>
+      <button class="icon-btn" data-action="toggle-notifications" title="Notifications">${icon("bell")}${unreadCount() ? `<span>${unreadCount()}</span>` : ""}</button>
+      <button class="profile-pill" data-action="open-modal" data-modal="profile"><span class="avatar tiny">${escapeHtml(currentInitials())}</span>${escapeHtml(state.currentUser.name || state.meta.role)}</button>
+    </header>
+  `;
+}
+
+function currentInitials() {
+  return state.currentUser.avatar || initials(state.currentUser.name || state.currentUser.email || "You");
+}
+
+function unreadCount() {
+  return state.notifications.filter((item) => !item.read).length;
+}
+
 function renderView() {
-  const view = $("#view");
-  const renderers = {
+  const views = {
     dashboard: renderDashboard,
     work: renderMyWork,
     projects: renderProjects,
     tasks: renderTasks,
-    team: renderTeam,
-    qa: renderQA,
+    review: renderReview,
+    delivery: renderDelivery,
     figma: renderFigma,
     docs: renderDocs,
     files: renderFiles,
-    reports: renderReports,
+    team: renderTeam,
     settings: renderSettings,
   };
-  view.innerHTML = renderers[state.view]();
-  bindViewEvents();
+  return views[state.meta.activeView]();
 }
 
-function bindViewEvents() {
-  document.querySelectorAll("[data-task]").forEach((item) => {
-    item.addEventListener("click", () => {
-      state.selectedTaskId = item.dataset.task;
-      renderView();
-    });
-  });
+function pageHead(title, subtitle, actions = "") {
+  return `<div class="page-head"><div><h1>${title}</h1><p>${subtitle}</p></div><div class="page-actions">${actions}</div></div>`;
+}
 
-  document.querySelectorAll("[data-star]").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.stopPropagation();
-      const task = taskById(button.dataset.star);
-      if (task.starUserIds.includes(currentUserId)) {
-        task.starUserIds = task.starUserIds.filter((id) => id !== currentUserId);
-      } else {
-        task.starUserIds.push(currentUserId);
+function renderSetupPanel() {
+  const steps = setupSteps();
+  if (steps.every(([, done]) => done)) return "";
+  return `
+    <section class="panel setup-panel">
+      <div class="panel-title"><h3>First-time setup</h3><span>${steps.filter(([, done]) => done).length}/${steps.length}</span></div>
+      <div class="setup-list">
+        ${steps.map(([label, done, modalName]) => `<button class="setup-step ${done ? "done" : ""}" data-action="open-modal" data-modal="${modalName}"><span>${done ? "✓" : ""}</span><strong>${label}</strong></button>`).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderDashboard() {
+  const metrics = [
+    ["My Tasks", state.tasks.filter((task) => task.assigneeId === "me" && task.status !== "Completed").length, "Create your first task to start your workflow."],
+    ["Due Today", state.tasks.filter((task) => task.dueDate === todayISO()).length, "Tasks due today will appear here."],
+    ["Overdue", state.tasks.filter(isOverdue).length, "Overdue work will appear here."],
+    ["In Review", state.tasks.filter((task) => ["Ready for QA", "In QA", "Rechecking"].includes(task.status)).length, "QA and review work will appear here."],
+    ["Ready for Delivery", state.tasks.filter((task) => task.status === "Ready for Delivery").length, "Approved delivery items will appear here."],
+  ];
+  return `
+    ${pageHead("Dashboard", "Your work, deadlines, and reviews in one place.", `<button class="primary" data-action="open-modal" data-modal="task">New Task</button><button class="secondary" data-action="open-modal" data-modal="project">New Project</button>`)}
+    ${renderSetupPanel()}
+    <div class="metric-grid">${metrics.map(([label, value, empty]) => `<article class="metric-card"><span>${label}</span><strong>${value}</strong><small>${value ? "Open details from the sidebar." : empty}</small></article>`).join("")}</div>
+    <div class="dashboard-grid">
+      <section class="panel">
+        <div class="panel-title"><h3>My Work List</h3><button class="text-btn" data-view="work">View all</button></div>
+        ${renderTaskList(myWorkTasks().slice(0, 6), "No tasks yet.", "Create your first task to start your workflow.")}
+      </section>
+      <section class="panel">
+        <div class="panel-title"><h3>Notifications</h3><button class="text-btn" data-action="mark-notifications-read">Mark read</button></div>
+        ${state.notifications.length ? `<div class="stack">${state.notifications.slice(0, 5).map(renderNotification).join("")}</div>` : emptyState("No notifications yet.", "Mentions, reminders, QA changes, and delivery alerts will appear here.")}
+      </section>
+    </div>
+  `;
+}
+
+function renderMyWork() {
+  return `
+    ${pageHead("My Work List", "Assigned, mentioned, starred, review, overdue, and rework tasks sorted by urgency.", `<button class="primary" data-action="open-modal" data-modal="task">New Task</button>`)}
+    <section class="panel">${renderTaskList(myWorkTasks(), "No work assigned yet.", "Tasks assigned to you, mentions, reminders, and QA work will appear here.")}</section>
+  `;
+}
+
+function renderProjects() {
+  return `
+    ${pageHead("Projects", "Create projects, attach team members, and track delivery status.", `<button class="secondary" data-action="toggle-project-view">${state.meta.projectView === "list" ? "Board View" : "List View"}</button><button class="primary" data-action="open-modal" data-modal="project">New Project</button>`)}
+    <section class="panel">
+      ${state.projects.length ? `<div class="${state.meta.projectView === "board" ? "card-grid" : "stack"}">${filtered(state.projects, ["name", "client", "description", "status", "priority"]).map(renderProjectCard).join("")}</div>` : emptyState("No projects yet.", "Create your first project.")}
+    </section>
+  `;
+}
+
+function renderTasks() {
+  const tasks = filtered(state.tasks, ["title", "description", "status", "priority", "taskType"]);
+  return `
+    ${pageHead("Tasks", "Move work through the complete BeeFlow status workflow.", `<button class="primary" data-action="open-modal" data-modal="task">New Task</button>`)}
+    <section class="panel">
+      ${tasks.length ? `<div class="board">${taskStatuses.slice(0, -1).map((status) => `<div class="lane"><div class="lane-head"><strong>${status}</strong><span>${tasks.filter((task) => task.status === status).length}</span></div>${tasks.filter((task) => task.status === status).map(renderTaskCard).join("") || `<div class="lane-empty">No tasks</div>`}</div>`).join("")}</div>` : emptyState("No tasks yet.", "Create your first task to start your workflow.")}
+    </section>
+  `;
+}
+
+function renderReview() {
+  const tasks = state.tasks.filter((task) => qaTabs.includes(task.status));
+  const visible = tasks.filter((task) => task.status === state.meta.qaTab);
+  return `
+    ${pageHead("Review Hub", "Only real tasks that are ready for QA or currently in review appear here.", `<button class="primary" data-action="open-modal" data-modal="qaIssue">Add QA Issue</button>`)}
+    <section class="panel">
+      <div class="tabs">${qaTabs.map((tab) => `<button class="tab ${state.meta.qaTab === tab ? "active" : ""}" data-action="qa-tab" data-tab="${tab}">${tab}</button>`).join("")}</div>
+      ${visible.length ? renderTaskList(visible, "", "") : emptyState(`No ${state.meta.qaTab} tasks.`, "Move a task to QA when it is ready for review.")}
+    </section>
+    <section class="panel">
+      <div class="panel-title"><h3>QA Issues</h3><span>${state.qaIssues.length}</span></div>
+      ${state.qaIssues.length ? `<div class="stack">${state.qaIssues.map(renderQaIssue).join("")}</div>` : emptyState("No QA issues yet.", "Add QA issues from review tasks when something needs changes.")}
+    </section>
+  `;
+}
+
+function renderDelivery() {
+  const deliveryTasks = state.tasks.filter((task) => ["Approved", "Ready for Delivery", "Delivered", "Completed"].includes(task.status));
+  return `
+    ${pageHead("Delivery", "Prepare final handoff packages with approved files, notes, and final links.", `<button class="primary" data-action="open-modal" data-modal="delivery">Create Delivery</button>`)}
+    <section class="panel">
+      <div class="panel-title"><h3>Ready tasks</h3><span>${deliveryTasks.length}</span></div>
+      ${deliveryTasks.length ? renderTaskList(deliveryTasks, "", "") : emptyState("No delivery-ready work yet.", "Approved and ready-for-delivery tasks will appear here.")}
+    </section>
+    <section class="panel">
+      <div class="panel-title"><h3>Delivery packages</h3><span>${state.deliveries.length}</span></div>
+      ${state.deliveries.length ? `<div class="card-grid">${filtered(state.deliveries, ["title", "status", "notes", "finalLink"]).map(renderDeliveryCard).join("")}</div>` : emptyState("No delivery packages yet.", "Create a delivery package when final files are ready.")}
+    </section>
+  `;
+}
+
+function renderFigma() {
+  return `
+    ${pageHead("Figma Work", "Store Figma links and frame metadata without embedding heavy files.", `<button class="primary" data-action="open-modal" data-modal="figma">Add Figma Link</button>`)}
+    <section class="panel">${state.figma.length ? `<div class="card-grid">${filtered(state.figma, ["fileName", "url", "pageName", "frameName", "status", "platform"]).map(renderFigmaCard).join("")}</div>` : emptyState("No Figma links yet.", "Add your first Figma file or frame link.")}</section>
+  `;
+}
+
+function renderDocs() {
+  return `
+    ${pageHead("Docs", "Create internal docs for guidelines, QA checklists, SOPs, and project notes.", `<button class="primary" data-action="open-modal" data-modal="doc">Create Doc</button>`)}
+    <section class="panel">${state.docs.length ? `<div class="card-grid">${filtered(state.docs, ["title", "category", "content"]).map(renderDocCard).join("")}</div>` : emptyState("No docs yet.", "Create your first internal doc.")}</section>
+  `;
+}
+
+function renderFiles() {
+  return `
+    ${pageHead("Files", "Track external links and file metadata without loading heavy files directly.", `<button class="primary" data-action="open-modal" data-modal="file">Add File Link</button>`)}
+    <section class="panel">${state.files.length ? `<div class="stack">${filtered(state.files, ["fileName", "fileType", "version", "status", "externalLink"]).map(renderFileRow).join("")}</div>` : emptyState("No files yet.", "Add your first file or external delivery link.")}</section>
+  `;
+}
+
+function renderTeam() {
+  return `
+    ${pageHead("Team", "Invite team members and organize work by role and department.", `<button class="primary" data-action="open-modal" data-modal="team">Invite team member</button>`)}
+    <section class="panel">${state.team.length ? `<div class="card-grid">${filtered(state.team, ["name", "email", "role", "department"]).map(renderTeamCard).join("")}</div>` : emptyState("No team members yet.", "Invite your first team member.")}</section>
+  `;
+}
+
+function renderSettings() {
+  return `
+    ${pageHead("Settings", "Manage onboarding, departments, and local workspace data.", `<button class="danger" data-action="reset-app">Reset local data</button>`)}
+    <section class="panel settings-grid">
+      <div><h3>Profile</h3><p>${escapeHtml(state.currentUser.name || "No name")} · ${escapeHtml(state.currentUser.email || "No email")}</p><button class="secondary" data-action="open-modal" data-modal="profile">Edit profile</button></div>
+      <div><h3>Workspace</h3><p>${escapeHtml(state.meta.workspaceName || "No workspace created yet.")}</p><button class="secondary" data-action="open-modal" data-modal="workspace">Edit workspace</button></div>
+      <div><h3>Your role</h3><p>${escapeHtml(state.meta.role)}</p><button class="secondary" data-action="change-role">Change role</button></div>
+      <div><h3>Departments</h3><p>${state.meta.departments.length ? state.meta.departments.map(escapeHtml).join(", ") : "No departments yet."}</p><button class="secondary" data-action="open-modal" data-modal="department">Add department</button></div>
+      <div><h3>Tags</h3><p>${state.tags.length ? state.tags.map((tag) => `#${escapeHtml(tag.name)}`).join(", ") : "No tags created yet."}</p><button class="secondary" data-action="open-modal" data-modal="tag">Create tag</button></div>
+    </section>
+  `;
+}
+
+function filtered(items, fields) {
+  const query = state.meta.search.trim().toLowerCase();
+  if (!query) return items;
+  return items.filter((item) => fields.some((field) => String(item[field] || "").toLowerCase().includes(query)));
+}
+
+function emptyState(title, copy) {
+  return `<div class="empty-state"><strong>${title}</strong><p>${copy}</p></div>`;
+}
+
+function renderTaskList(tasks, title, copy) {
+  return tasks.length ? `<div class="stack">${tasks.map(renderTaskCard).join("")}</div>` : emptyState(title, copy);
+}
+
+function renderTaskCard(task) {
+  const tags = normalizeTags(task.tags);
+  return `
+    <article class="task-card" data-task-id="${task.id}">
+      <button class="star-btn ${task.starredBy?.includes("me") ? "active" : ""}" data-action="star-task" data-id="${task.id}" title="Star task">${icon("star")}</button>
+      <div class="task-main" data-action="open-task" data-id="${task.id}">
+        <div class="task-title"><strong>${escapeHtml(task.title)}</strong>${task.mentionedUserIds?.includes("me") ? `<span class="pill accent">Mentioned</span>` : ""}</div>
+        <p>${escapeHtml(task.description || "No description added.")}</p>
+        <div class="task-meta"><span>${escapeHtml(projectName(task.projectId))}</span><span>${escapeHtml(task.priority)}</span><span>${escapeHtml(task.dueDate || "No due date")}</span></div>
+        ${tags.length ? `<div class="tag-row">${tags.map((tag) => `<span class="tag-chip">#${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
+      </div>
+      <select class="status-select" data-action="change-status" data-id="${task.id}">${optionList(taskStatuses, task.status)}</select>
+    </article>
+  `;
+}
+
+function renderProjectCard(project) {
+  return `<article class="data-card"><div class="card-top"><h3>${escapeHtml(project.name)}</h3><span class="pill">${escapeHtml(project.status)}</span></div><p>${escapeHtml(project.description || "No description.")}</p><div class="meta-row"><span>${escapeHtml(project.client || "No client")}</span><span>${escapeHtml(project.priority)}</span><span>${escapeHtml(project.dueDate || "No due date")}</span></div></article>`;
+}
+
+function renderTeamCard(member) {
+  return `<article class="data-card"><div class="avatar">${initials(member.name || member.email)}</div><h3>${escapeHtml(member.name || "Unnamed")}</h3><p>${escapeHtml(member.email)}</p><div class="meta-row"><span>${escapeHtml(member.role)}</span><span>${escapeHtml(member.department)}</span><span>${escapeHtml(member.status)}</span></div></article>`;
+}
+
+function renderFigmaCard(item) {
+  return `<article class="data-card"><div class="card-top"><h3>${escapeHtml(item.fileName)}</h3><span class="pill">${escapeHtml(item.status)}</span></div><p>${escapeHtml(item.frameName || "No frame name.")}</p><div class="meta-row"><span>${escapeHtml(item.width)} x ${escapeHtml(item.height)}</span><span>${escapeHtml(item.aspectRatio)}</span><span>${escapeHtml(item.platform)}</span></div><button class="secondary" data-action="open-link" data-url="${escapeHtml(item.url)}">Open Figma</button></article>`;
+}
+
+function renderDocCard(doc) {
+  return `<article class="data-card"><div class="card-top"><h3>${escapeHtml(doc.title)}</h3><span class="pill">${escapeHtml(doc.category)}</span></div><p>${escapeHtml(doc.content || "No content yet.")}</p></article>`;
+}
+
+function renderFileRow(file) {
+  return `<article class="file-row"><strong>${escapeHtml(file.fileName)}</strong><span>${escapeHtml(file.fileType)}</span><span>${escapeHtml(file.size || "No size")}</span><span>${escapeHtml(file.version)}</span><button class="secondary" data-action="open-link" data-url="${escapeHtml(file.externalLink)}">Open</button></article>`;
+}
+
+function renderDeliveryCard(delivery) {
+  return `<article class="data-card"><div class="card-top"><h3>${escapeHtml(delivery.title)}</h3><span class="pill">${escapeHtml(delivery.status)}</span></div><p>${escapeHtml(delivery.notes || "No notes.")}</p><div class="meta-row"><span>${escapeHtml(projectName(delivery.projectId))}</span><span>${escapeHtml(taskName(delivery.taskId))}</span></div><button class="secondary" data-action="open-link" data-url="${escapeHtml(delivery.finalLink)}">Open delivery</button></article>`;
+}
+
+function renderQaIssue(issue) {
+  return `<article class="data-card"><div class="card-top"><h3>${escapeHtml(issue.title)}</h3><span class="pill">${escapeHtml(issue.status)}</span></div><p>${escapeHtml(issue.comment || "No comment.")}</p><div class="meta-row"><span>${escapeHtml(issue.issueType)}</span><span>${escapeHtml(issue.priority)}</span><span>${escapeHtml(personName(issue.assignedTo))}</span></div></article>`;
+}
+
+function renderNotification(item) {
+  return `<button class="notification ${item.read ? "" : "unread"}" data-action="notification-click" data-id="${item.id}"><span>${escapeHtml(item.title)}</span><small>${new Date(item.createdAt).toLocaleString()}</small></button>`;
+}
+
+function initials(value = "") {
+  return value.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "U";
+}
+
+function renderTaskDrawer() {
+  const task = state.tasks.find((item) => item.id === drawerTaskId);
+  if (!task) return "";
+  const comments = task.comments || [];
+  const taskFiles = state.files.filter((file) => file.taskId === task.id);
+  const taskFigma = state.figma.filter((item) => item.taskId === task.id);
+  const taskActivity = state.activity.filter((item) => item.taskId === task.id).slice(0, 8);
+  return `
+    <aside class="drawer slide-in">
+      <div class="drawer-head"><div><h2>${escapeHtml(task.title)}</h2><p>${escapeHtml(task.taskType)} · ${escapeHtml(task.priority)}</p></div><button class="icon-btn" data-action="close-drawer">×</button></div>
+      <div class="drawer-actions">
+        <button class="secondary" data-action="open-modal" data-modal="reminder" data-task="${task.id}">Add Reminder</button>
+        <button class="secondary" data-action="move-qa" data-id="${task.id}">Move to QA</button>
+        <button class="secondary" data-action="open-modal" data-modal="delivery" data-task="${task.id}">Deliver</button>
+        ${task.status === "Completed" ? `<button class="secondary" data-action="reopen-task" data-id="${task.id}">Reopen Task</button>` : `<button class="primary" data-action="mark-complete" data-id="${task.id}">Mark Complete</button>`}
+        <button class="danger" data-action="delete-task" data-id="${task.id}">Delete Task</button>
+      </div>
+      <div class="drawer-section"><h3>Details</h3>${detailLine("Project", projectName(task.projectId))}${detailLine("Assignee", personName(task.assigneeId))}${detailLine("Reviewer", personName(task.reviewerId))}${detailLine("Status", task.status)}${detailLine("Due date", task.dueDate || "No due date")}<div class="detail-line"><span>Tags</span><strong>${normalizeTags(task.tags).length ? normalizeTags(task.tags).map((tag) => `#${escapeHtml(tag)}`).join(" ") : "No tags"}</strong></div></div>
+      <div class="drawer-section"><h3>Description</h3><p>${escapeHtml(task.description || "No description added.")}</p></div>
+      <div class="drawer-section"><h3>Figma links</h3>${taskFigma.length ? taskFigma.map((item) => `<p><button class="text-btn" data-action="open-link" data-url="${escapeHtml(item.url)}">${escapeHtml(item.fileName)}</button></p>`).join("") : `<p class="muted">No Figma link attached.</p>`}</div>
+      <div class="drawer-section"><h3>Files</h3>${taskFiles.length ? taskFiles.map((file) => `<p><button class="text-btn" data-action="open-link" data-url="${escapeHtml(file.externalLink)}">${escapeHtml(file.fileName)}</button></p>`).join("") : `<p class="muted">No files attached.</p>`}</div>
+      <div class="drawer-section">
+        <h3>Comments</h3>
+        <div class="mention-box">${state.team.length ? state.team.map((user) => `<button data-action="insert-mention" data-name="${escapeHtml(user.name)}">@${escapeHtml(user.name)}</button>`).join("") : `<span>No team members to mention yet.</span>`}</div>
+        <textarea id="commentText" placeholder="Add a comment. Type @name to mention someone."></textarea>
+        <button class="primary" data-action="add-comment" data-id="${task.id}">Add Comment</button>
+        <div class="stack comment-list">${comments.length ? comments.map((comment) => `<article class="comment"><p>${escapeHtml(comment.text)}</p><small>${new Date(comment.createdAt).toLocaleString()}</small></article>`).join("") : `<p class="muted">No comments yet.</p>`}</div>
+      </div>
+      <div class="drawer-section"><h3>Activity log</h3>${taskActivity.length ? taskActivity.map((item) => `<p class="activity-line">${escapeHtml(item.message)}</p>`).join("") : `<p class="muted">No activity yet.</p>`}</div>
+    </aside>
+  `;
+}
+
+function detailLine(label, value) {
+  return `<div class="detail-line"><span>${label}</span><strong>${escapeHtml(value)}</strong></div>`;
+}
+
+function renderModal() {
+  const content = modalContent(modal);
+  return `<div class="modal-backdrop fade-in"><form class="modal scale-in" data-form="${modal.type}"><div class="modal-head"><h2>${content.title}</h2><button type="button" class="icon-btn" data-action="close-modal">×</button></div>${content.body}<div class="modal-actions"><button type="button" class="secondary" data-action="close-modal">Cancel</button><button class="primary" type="submit">${content.submit}</button></div></form></div>`;
+}
+
+function modalContent(context) {
+  const type = context.type;
+  const taskId = context.taskId || "";
+  const shared = {
+    profile: { title: "Profile", submit: "Save Profile", body: field("name", "Name", state.currentUser.name, "Your name", true) + field("email", "Email", state.currentUser.email, "you@beenco.io", true, "email") + selectField("role", "Role", roles, state.currentUser.role || state.meta.role) + selectField("department", "Department", state.meta.departments.length ? state.meta.departments : departments, state.currentUser.department) },
+    workspace: { title: "Create workspace", submit: "Save Workspace", body: field("workspaceName", "Workspace name", state.meta.workspaceName, "Beenco Workspace", true) },
+    department: { title: "Add department", submit: "Add Department", body: selectField("department", "Department", departments) },
+    tag: { title: "Create tag", submit: "Create Tag", body: field("name", "Tag name", "", "Urgent", true) },
+    team: { title: "Invite team member", submit: "Invite Team", body: field("name", "Name", "", "Full name", true) + field("email", "Email", "", "name@beenco.io", true, "email") + selectField("role", "Role", roles) + selectField("department", "Department", state.meta.departments.length ? state.meta.departments : departments) },
+    project: { title: "New project", submit: "Create Project", body: field("name", "Project name", "", "", true) + field("client", "Client optional") + textArea("description", "Description") + selectField("managerId", "Manager", [state.currentUser, ...state.team].map((u) => u.id), "me", personName) + selectField("status", "Status", ["Not Started", "In Progress", "In Review", "In QA", "Changes Required", "Approved", "Ready for Delivery", "Delivered", "On Hold"]) + selectField("priority", "Priority", priorities, "Medium") + field("startDate", "Start date", todayISO(), "", false, "date") + field("dueDate", "Due date", "", "", false, "date") + field("tags", "Tags", "", "Web3, Design") },
+    task: { title: "New task", submit: "Create Task", body: field("title", "Task title", "", "", true) + textArea("description", "Description") + selectFieldHtml("projectId", "Project", projectOptions()) + selectFieldHtml("assigneeId", "Assignee", userOptions("me")) + selectFieldHtml("reviewerId", "Reviewer", userOptions()) + selectField("priority", "Priority", priorities, "Medium") + selectField("status", "Status", taskStatuses, "Backlog") + selectField("taskType", "Task type", creativeTypes, "UI/UX Design") + field("dueDate", "Due date", "", "", false, "date") + field("tags", "Tags", "", "QA Required, Web3") + tagHint() + renderDesignFields() },
+    figma: { title: "Add Figma link", submit: "Save Figma Link", body: field("fileName", "Figma file name", "", "", true) + field("url", "Figma URL", "", "https://figma.com/...", true, "url") + field("pageName", "Page name") + field("frameName", "Frame name") + field("width", "Width", "", "1440", false, "number") + field("height", "Height", "", "900", false, "number") + field("aspectRatio", "Aspect ratio", "", "16:9") + field("platform", "Platform", "", "Website") + field("version", "Version", "v1") + selectField("status", "Status", ["Draft", "In Progress", "Ready for Review", "Changes Required", "Approved", "Final", "Exported", "Delivered"]) + selectFieldHtml("projectId", "Related project", projectOptions()) + selectFieldHtml("taskId", "Related task", taskOptions()) },
+    file: { title: "Add file link", submit: "Save File", body: field("fileName", "File name", "", "", true) + selectField("fileType", "File type", ["Image", "Video", "Design File", "Document", "Source File", "ZIP Folder", "External Link"]) + field("size", "Size", "", "2.4 GB") + field("version", "Version", "v1") + selectField("status", "Status", ["Draft", "Internal Review", "QA Review", "Approved", "Final", "Delivered"]) + selectFieldHtml("projectId", "Related project", projectOptions()) + selectFieldHtml("taskId", "Related task", taskOptions()) + field("externalLink", "External link", "", "https://drive.google.com/...", true, "url") },
+    delivery: { title: "Create delivery", submit: "Create Delivery", body: field("title", "Delivery title", "", "", true) + selectFieldHtml("projectId", "Related project", projectOptions()) + selectFieldHtml("taskId", "Related task", taskOptions(taskId)) + field("finalLink", "Final delivery link", "", "https://drive.google.com/...", true, "url") + field("figmaLink", "Final Figma link", "", "https://figma.com/...") + selectField("status", "Status", ["Preparing", "Internal Review", "QA Approved", "Ready to Deliver", "Delivered"]) + textArea("notes", "Delivery notes") },
+    doc: { title: "Create doc", submit: "Create Doc", body: field("title", "Doc title", "", "", true) + selectField("category", "Category", docCategories) + textArea("content", "Content") + selectFieldHtml("projectId", "Related project", projectOptions()) + selectFieldHtml("taskId", "Related task", taskOptions()) },
+    reminder: { title: "Add reminder", submit: "Save Reminder", body: selectField("preset", "Reminder option", ["Today", "Tomorrow", "Before due date", "Custom"]) + field("date", "Reminder date", todayISO(), "", false, "date") + field("time", "Reminder time", "09:00", "", false, "time") + field("note", "Reminder note", "", "Follow up") + `<input type="hidden" name="taskId" value="${taskId}" />` },
+    qaIssue: { title: "Add QA issue", submit: "Add QA Issue", body: field("title", "Issue title", "", "", true) + selectField("issueType", "Issue type", ["UI Issue", "UX Issue", "Size Issue", "Aspect Ratio Issue", "Export Issue", "Text Issue", "Design Mismatch", "Missing Requirement", "Mobile Issue", "File Issue", "Client Feedback"]) + selectField("priority", "Priority", priorities, "Medium") + selectFieldHtml("assignedTo", "Assigned to", userOptions()) + selectFieldHtml("taskId", "Task", taskOptions(taskId)) + field("screenshotUrl", "Screenshot/file link", "", "https://...") + field("figmaFrameUrl", "Figma frame link", "", "https://figma.com/...") + textArea("comment", "Comment") + selectField("status", "Status", qaStatuses) },
+  };
+  return shared[type];
+}
+
+function field(name, label, value = "", placeholder = "", required = false, type = "text") {
+  return `<label class="field"><span>${label}</span><input name="${name}" type="${type}" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" ${required ? "required" : ""} /></label>`;
+}
+
+function textArea(name, label) {
+  return `<label class="field"><span>${label}</span><textarea name="${name}" rows="4"></textarea></label>`;
+}
+
+function selectField(name, label, values, selected = "", labelFn = (value) => value) {
+  return `<label class="field"><span>${label}</span><select name="${name}">${values.map((value) => `<option value="${value}" ${selected === value ? "selected" : ""}>${escapeHtml(labelFn(value))}</option>`).join("")}</select></label>`;
+}
+
+function selectFieldHtml(name, label, html) {
+  return `<label class="field"><span>${label}</span><select name="${name}">${html}</select></label>`;
+}
+
+function renderDesignFields() {
+  return `<details class="form-details"><summary>Creative size/spec fields</summary>${selectField("commonSize", "Common size", commonSizes)}${field("outputType", "Output type")}${field("width", "Width", "", "", false, "number")}${field("height", "Height", "", "", false, "number")}${field("aspectRatio", "Aspect ratio")}${field("platform", "Platform")}${field("format", "Format", "", "PNG, SVG, PDF")}${textArea("safeAreaNotes", "Safe area notes")}${textArea("exportRequirement", "Export requirement")}</details>`;
+}
+
+function tagHint() {
+  return state.tags.length ? `<div class="tag-row form-tags">${state.tags.map((tag) => `<span class="tag-chip">#${escapeHtml(tag.name)}</span>`).join("")}</div>` : `<p class="form-note">Tags you type here are saved to the workspace tag system.</p>`;
+}
+
+function bindEvents() {
+  document.querySelectorAll("[data-view]").forEach((button) => button.addEventListener("click", () => setView(button.dataset.view)));
+  document.querySelectorAll("[data-action]:not(select)").forEach((element) => element.addEventListener("click", handleAction));
+  document.querySelectorAll('select[data-action="change-status"]').forEach((select) => select.addEventListener("change", handleAction));
+  const search = document.querySelector('[data-action="search"]');
+  if (search) search.addEventListener("input", (event) => { state.meta.search = event.target.value; saveState(); render(); });
+  const commentText = $("#commentText");
+  if (commentText) commentText.addEventListener("input", () => document.body.classList.toggle("mentioning", commentText.value.includes("@")));
+  document.querySelectorAll("[data-form]").forEach((form) => form.addEventListener("submit", handleFormSubmit));
+  document.querySelectorAll("form[data-form] input").forEach((input) => {
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        event.currentTarget.closest("form")?.requestSubmit();
       }
-      renderView();
-    });
-  });
-
-  document.querySelectorAll(".task-card").forEach((card) => {
-    card.addEventListener("dragstart", (event) => {
-      event.dataTransfer.setData("text/plain", card.dataset.task);
-    });
-  });
-
-  document.querySelectorAll(".kanban-column").forEach((column) => {
-    column.addEventListener("dragover", (event) => event.preventDefault());
-    column.addEventListener("drop", (event) => {
-      event.preventDefault();
-      const task = taskById(event.dataTransfer.getData("text/plain"));
-      task.status = column.dataset.lane;
-      renderView();
-    });
-  });
-
-  document.querySelectorAll("[data-view]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.view = button.dataset.view;
-      renderShell();
     });
   });
 }
 
-renderShell();
+function handleAction(event) {
+  const action = event.currentTarget.dataset.action;
+  const el = event.currentTarget;
+  if (action !== "search") event.preventDefault();
+  const actions = {
+    "select-role": () => { state.meta.role = el.dataset.role; state.currentUser.role = el.dataset.role; saveState(); render(); },
+    "open-modal": () => { modal = { type: el.dataset.modal, taskId: el.dataset.task || "" }; render(); },
+    "close-modal": () => { modal = null; render(); },
+    "open-task": () => { drawerTaskId = el.dataset.id; render(); },
+    "close-drawer": () => { drawerTaskId = ""; render(); },
+    "star-task": () => toggleStar(el.dataset.id),
+    "change-status": () => changeStatus(el.dataset.id, el.value),
+    "move-qa": () => changeStatus(el.dataset.id, "Ready for QA"),
+    "mark-complete": () => markComplete(el.dataset.id),
+    "reopen-task": () => changeStatus(el.dataset.id, "To Do"),
+    "add-comment": () => addComment(el.dataset.id),
+    "insert-mention": () => insertMention(el.dataset.name),
+    "qa-tab": () => { state.meta.qaTab = el.dataset.tab; saveState(); render(); },
+    "toggle-project-view": () => { state.meta.projectView = state.meta.projectView === "list" ? "board" : "list"; saveState(); render(); },
+    "mark-notifications-read": () => { state.notifications.forEach((item) => item.read = true); saveState(); render(); },
+    "notification-click": () => openNotification(el.dataset.id),
+    "toggle-notifications": () => setView("dashboard"),
+    "open-link": () => { if (el.dataset.url) window.open(el.dataset.url, "_blank", "noopener"); },
+    "change-role": () => { state.meta.role = ""; saveState(); render(); },
+    "restart-login": () => { state.meta.pendingEmail = ""; state.meta.verificationCode = ""; state.meta.verificationSent = false; state.meta.loginError = ""; saveState(); render(); },
+    "resend-code": () => resendVerificationCode(),
+    "delete-task": () => deleteTask(el.dataset.id),
+    "reset-app": () => resetApp(),
+    "load-demo": () => loadDemo(),
+  };
+  if (actions[action]) actions[action]();
+}
+
+function handleFormSubmit(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const data = Object.fromEntries(new FormData(form).entries());
+  const handlers = {
+    login: () => startLogin(data),
+    verifyLogin: () => verifyLogin(data),
+    profile: () => saveProfile(data),
+    workspace: () => { state.meta.workspaceName = data.workspaceName.trim(); },
+    department: () => { if (!state.meta.departments.includes(data.department)) state.meta.departments.push(data.department); },
+    tag: () => createTag(data.name),
+    team: () => state.team.push({ id: uid("user"), name: data.name, email: data.email, role: data.role, department: data.department, status: "Active" }),
+    project: () => state.projects.push({ id: uid("project"), ...data, teamMembers: [], createdAt: new Date().toISOString() }),
+    task: () => createTask(data),
+    figma: () => state.figma.push({ id: uid("figma"), ...data, createdAt: new Date().toISOString() }),
+    file: () => state.files.push({ id: uid("file"), ...data, uploadedBy: "me", date: todayISO(), createdAt: new Date().toISOString() }),
+    delivery: () => createDelivery(data),
+    doc: () => state.docs.push({ id: uid("doc"), ...data, ownerId: "me", createdAt: new Date().toISOString(), lastUpdated: todayISO() }),
+    reminder: () => createReminder(data),
+    qaIssue: () => createQaIssue(data),
+  };
+  Promise.resolve(handlers[form.dataset.form]()).then((result) => {
+    if (result === false) return;
+    modal = null;
+    saveState();
+    render();
+  });
+}
+
+function createTask(data) {
+  normalizeTags(data.tags).forEach(createTag);
+  const task = { id: uid("task"), ...data, comments: [], mentionedUserIds: [], starredBy: [], completedAt: "", completedBy: "", createdAt: new Date().toISOString() };
+  state.tasks.push(task);
+  notify(`Task created: ${task.title}`, task.id);
+  logActivity(`Task created`, task.id);
+}
+
+async function startLogin(data) {
+  state.currentUser.name = data.name.trim();
+  state.currentUser.email = data.email.trim();
+  state.currentUser.avatar = initials(data.name || data.email);
+  state.meta.pendingEmail = state.currentUser.email;
+  state.meta.verificationCode = String(Math.floor(100000 + Math.random() * 900000));
+  state.meta.loginError = "";
+  const sent = await sendVerificationEmail(state.currentUser.email, state.meta.verificationCode, state.currentUser.name);
+  if (!sent) return false;
+  state.meta.verificationSent = true;
+}
+
+async function verifyLogin(data) {
+  state.meta.loginError = "";
+  const backendVerified = await verifyCodeWithBackend(state.meta.pendingEmail, String(data.code).trim());
+  if (backendVerified === false) return false;
+  if (String(data.code).trim() !== state.meta.verificationCode) {
+    state.meta.loginError = "Verification code is not correct.";
+    saveState();
+    render();
+    return false;
+  }
+  state.meta.isAuthenticated = true;
+  state.meta.pendingEmail = "";
+  state.meta.verificationCode = "";
+  state.meta.verificationSent = false;
+  state.meta.loginError = "";
+  return true;
+}
+
+async function resendVerificationCode() {
+  if (!state.meta.pendingEmail) return;
+  state.meta.verificationCode = String(Math.floor(100000 + Math.random() * 900000));
+  state.meta.loginError = "";
+  const sent = await sendVerificationEmail(state.meta.pendingEmail, state.meta.verificationCode, state.currentUser.name);
+  if (sent) {
+    state.meta.verificationSent = true;
+    flash("Verification code sent.");
+  }
+  saveState();
+  render();
+}
+
+async function sendVerificationEmail(email, code, name) {
+  try {
+    const response = await fetch("/api/auth/send-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, code, name, product: "BeeFlow" }),
+    });
+    if (!response.ok) throw new Error("Email service rejected the request.");
+    return true;
+  } catch {
+    state.meta.loginError = "Email verification is not configured yet. Add a backend endpoint at /api/auth/send-code to send this code by email.";
+    state.meta.pendingEmail = "";
+    state.meta.verificationCode = "";
+    state.meta.verificationSent = false;
+    saveState();
+    render();
+    return false;
+  }
+}
+
+async function verifyCodeWithBackend(email, code) {
+  try {
+    const response = await fetch("/api/auth/verify-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, code }),
+    });
+    if (response.status === 404) return null;
+    if (!response.ok) {
+      state.meta.loginError = "Verification failed. Check the code and try again.";
+      saveState();
+      render();
+      return false;
+    }
+    const result = await response.json().catch(() => ({ verified: true }));
+    if (result.verified === false) {
+      state.meta.loginError = "Verification code is not correct.";
+      saveState();
+      render();
+      return false;
+    }
+    return true;
+  } catch {
+    return null;
+  }
+}
+
+function saveProfile(data) {
+  state.currentUser.name = data.name.trim();
+  state.currentUser.email = data.email.trim();
+  state.currentUser.role = data.role;
+  state.currentUser.department = data.department;
+  state.currentUser.avatar = initials(data.name || data.email);
+  state.meta.role = data.role || state.meta.role;
+}
+
+function createTag(name) {
+  const tagName = String(name || "").trim().replace(/^#/, "");
+  if (!tagName) return;
+  if (!state.tags.some((tag) => tag.name.toLowerCase() === tagName.toLowerCase())) {
+    state.tags.push({ id: uid("tag"), name: tagName, createdAt: new Date().toISOString() });
+  }
+}
+
+function normalizeTags(value = "") {
+  return String(value).split(",").map((tag) => tag.trim().replace(/^#/, "")).filter(Boolean);
+}
+
+function createDelivery(data) {
+  state.deliveries.push({ id: uid("delivery"), ...data, createdBy: "me", deliveredAt: data.status === "Delivered" ? new Date().toISOString() : "", createdAt: new Date().toISOString() });
+  if (data.taskId && ["Ready to Deliver", "Delivered"].includes(data.status)) {
+    changeStatus(data.taskId, data.status === "Delivered" ? "Delivered" : "Ready for Delivery", false);
+  }
+  notify(`Delivery created: ${data.title}`, data.taskId);
+  logActivity(`Delivery package created`, data.taskId);
+}
+
+function createReminder(data) {
+  const task = state.tasks.find((item) => item.id === data.taskId);
+  const date = data.preset === "Tomorrow" ? tomorrowISO() : data.preset === "Before due date" && task?.dueDate ? task.dueDate : data.date;
+  state.reminders.push({ id: uid("reminder"), taskId: data.taskId, userId: "me", reminderDate: date, reminderTime: data.time, reminderNote: data.note, status: "Active", createdAt: new Date().toISOString() });
+  notify(`Reminder set${task ? ` for ${task.title}` : ""}`, data.taskId);
+  logActivity(`Reminder added`, data.taskId);
+}
+
+function createQaIssue(data) {
+  state.qaIssues.push({ id: uid("qa"), ...data, createdBy: "me", createdAt: new Date().toISOString() });
+  if (data.taskId) changeStatus(data.taskId, "Changes Required", false);
+  notify(`QA issue added: ${data.title}`, data.taskId);
+}
+
+function toggleStar(taskId) {
+  const task = state.tasks.find((item) => item.id === taskId);
+  if (!task) return;
+  task.starredBy = task.starredBy || [];
+  task.starredBy = task.starredBy.includes("me") ? task.starredBy.filter((id) => id !== "me") : [...task.starredBy, "me"];
+  saveState();
+  render();
+}
+
+function changeStatus(taskId, status, shouldRender = true) {
+  const task = state.tasks.find((item) => item.id === taskId);
+  if (!task) return;
+  task.status = status;
+  if (status === "Ready for QA") notify(`Task ready for QA: ${task.title}`, task.id);
+  if (status === "Approved") notify(`Task approved: ${task.title}`, task.id);
+  if (status === "Ready for Delivery") notify(`Delivery ready: ${task.title}`, task.id);
+  logActivity(`Status changed to ${status}`, task.id);
+  saveState();
+  if (shouldRender) render();
+}
+
+function markComplete(taskId) {
+  const task = state.tasks.find((item) => item.id === taskId);
+  if (!task) return;
+  if (taskNeedsQA(task) && !["Approved", "Ready for Delivery", "Delivered", "Completed"].includes(task.status)) {
+    flash("This task needs QA before completion.");
+    return;
+  }
+  task.status = "Completed";
+  task.completedAt = new Date().toISOString();
+  task.completedBy = "me";
+  notify(`Task completed: ${task.title}`, task.id);
+  logActivity(`Task completed`, task.id);
+  saveState();
+  render();
+}
+
+function deleteTask(taskId) {
+  const task = state.tasks.find((item) => item.id === taskId);
+  if (!task) return;
+  if (!confirm(`Delete task "${task.title}"? This cannot be undone.`)) return;
+  state.tasks = state.tasks.filter((item) => item.id !== taskId);
+  state.figma = state.figma.filter((item) => item.taskId !== taskId);
+  state.files = state.files.filter((item) => item.taskId !== taskId);
+  state.qaIssues = state.qaIssues.filter((item) => item.taskId !== taskId);
+  state.reminders = state.reminders.filter((item) => item.taskId !== taskId);
+  state.deliveries = state.deliveries.filter((item) => item.taskId !== taskId);
+  state.notifications = state.notifications.filter((item) => item.taskId !== taskId);
+  drawerTaskId = "";
+  saveState();
+  render();
+}
+
+function addComment(taskId) {
+  const textarea = $("#commentText");
+  const text = textarea?.value.trim();
+  if (!text) return;
+  const task = state.tasks.find((item) => item.id === taskId);
+  if (!task) return;
+  task.comments = task.comments || [];
+  task.comments.push({ id: uid("comment"), text, authorId: "me", createdAt: new Date().toISOString() });
+  state.team.forEach((user) => {
+    if (text.toLowerCase().includes(`@${user.name.toLowerCase()}`)) {
+      task.mentionedUserIds = [...new Set([...(task.mentionedUserIds || []), user.id])];
+      notify(`${user.name} mentioned in ${task.title}`, task.id);
+    }
+  });
+  if (text.includes("@You") || text.includes("@you")) task.mentionedUserIds = [...new Set([...(task.mentionedUserIds || []), "me"])];
+  logActivity(`Comment added`, task.id);
+  saveState();
+  render();
+}
+
+function insertMention(name) {
+  const textarea = $("#commentText");
+  if (!textarea) return;
+  textarea.value = `${textarea.value}${textarea.value.endsWith(" ") || !textarea.value ? "" : " "}@${name} `;
+  textarea.focus();
+}
+
+function openNotification(id) {
+  const item = state.notifications.find((notification) => notification.id === id);
+  if (!item) return;
+  item.read = true;
+  if (item.taskId) drawerTaskId = item.taskId;
+  saveState();
+  render();
+}
+
+function resetApp() {
+  if (!confirm("Reset all local BeeFlow data?")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state = defaultState();
+  modal = null;
+  drawerTaskId = "";
+  render();
+}
+
+function loadDemo() {
+  if (!confirm("Load demo workspace data? This replaces current local data.")) return;
+  state = defaultState();
+  state.meta.role = "Owner / Admin";
+  state.currentUser.role = "Owner / Admin";
+  state.meta.workspaceName = "Beenco Demo Workspace";
+  state.meta.departments = ["Design", "Development", "QA"];
+  state.team = [
+    { id: "demo_designer", name: "Demo Designer", email: "designer@example.com", role: "Designer", department: "Design", status: "Active" },
+    { id: "demo_reviewer", name: "Demo Reviewer", email: "reviewer@example.com", role: "QA / Reviewer", department: "QA", status: "Active" },
+  ];
+  state.projects = [{ id: "demo_project", name: "Demo Project", client: "", description: "Optional demo data. Remove with reset.", managerId: "me", status: "In Progress", priority: "High", startDate: todayISO(), dueDate: tomorrowISO(), tags: "Demo" }];
+  state.tasks = [{ id: "demo_task", projectId: "demo_project", title: "Demo task ready for QA", description: "This exists only after clicking Load demo workspace.", assigneeId: "demo_designer", reviewerId: "demo_reviewer", priority: "High", status: "Ready for QA", taskType: "UI/UX Design", dueDate: tomorrowISO(), tags: "Demo", comments: [], mentionedUserIds: [], starredBy: [], createdAt: new Date().toISOString() }];
+  saveState();
+  render();
+}
+
+function flash(message) {
+  toast = message;
+  render();
+  setTimeout(() => { toast = ""; render(); }, 1800);
+}
+
+render();
