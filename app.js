@@ -737,7 +737,7 @@ async function sendVerificationEmail(email, code, name) {
     if (!response.ok) throw new Error("Email service rejected the request.");
     return true;
   } catch {
-    state.meta.loginError = "Email verification is not configured yet. Add a backend endpoint at /api/auth/send-code to send this code by email.";
+    state.meta.loginError = "Open BeeFlow through the Vercel/Next app so the secure email login route can send your code.";
     state.meta.pendingEmail = "";
     state.meta.verificationCode = "";
     state.meta.verificationSent = false;

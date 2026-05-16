@@ -1,0 +1,163 @@
+@font-face {
+  font-family: "Poppins";
+  src: url("/assets/fonts/Poppins-Regular.ttf") format("truetype");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("/assets/fonts/Poppins-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("/assets/fonts/Poppins-Bold.ttf") format("truetype");
+  font-weight: 700;
+}
+
+:root {
+  --black: #000000;
+  --yellow: #d5ff27;
+  --white: #ffffff;
+  --surface: #080808;
+  --surface-2: #111111;
+  --border: rgba(255, 255, 255, 0.08);
+  --muted: rgba(255, 255, 255, 0.55);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--white);
+  background: var(--black);
+  font-family: "Poppins", system-ui, sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.auth-screen {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 28px;
+}
+
+.auth-card {
+  width: min(820px, 100%);
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+}
+
+.brand-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--black);
+  background: var(--yellow);
+  border-radius: 10px;
+  font-weight: 800;
+}
+
+.brand-row strong,
+.brand-row small {
+  display: block;
+}
+
+.brand-row small,
+.auth-card p,
+.field span,
+.message {
+  color: var(--muted);
+}
+
+.auth-card h1 {
+  margin: 42px 0 10px;
+  font-size: clamp(32px, 5vw, 44px);
+  line-height: 1.1;
+}
+
+.auth-card p {
+  margin: 0 0 24px;
+  line-height: 1.7;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.field input {
+  height: 44px;
+  padding: 0 14px;
+  color: var(--white);
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  outline: none;
+}
+
+.field input:focus {
+  border-color: rgba(213, 255, 39, 0.5);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.primary,
+.secondary {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+.primary {
+  color: #000;
+  background: var(--yellow);
+  border-color: var(--yellow);
+  font-weight: 700;
+}
+
+.secondary {
+  color: var(--white);
+  background: var(--surface-2);
+}
+
+.message {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.message.error {
+  color: var(--yellow);
+  border-color: rgba(213, 255, 39, 0.2);
+}
