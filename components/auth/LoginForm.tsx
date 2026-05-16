@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import VerifyCodeForm from "./VerifyCodeForm";
 
 type AuthStep = "login" | "verify";
@@ -12,6 +12,22 @@ export default function LoginForm() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const authError = params.get("error");
+    if (!authError) return;
+
+    const messages: Record<string, string> = {
+      google_not_configured: "Google sign-in is not configured yet.",
+      google_invalid_state: "Google sign-in expired. Please try again.",
+      google_failed: "Google sign-in failed. Please try again.",
+      google_unverified_email: "Google did not verify this email address."
+    };
+
+    setError(messages[authError] || "Google sign-in failed. Please try again.");
+    window.history.replaceState({}, "", "/");
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -81,6 +97,11 @@ export default function LoginForm() {
         <p>Use your work email. BeeFlow will send a one-time code before opening the workspace.</p>
         {message ? <div className="message">{message}</div> : null}
         {error ? <div className="message error">{error}</div> : null}
+        <a className="google-button" href="/api/auth/google/start">
+          <span>G</span>
+          Continue with Google
+        </a>
+        <div className="divider"><span>or use email code</span></div>
         <label className="field">
           <span>Your name</span>
           <input value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" />
