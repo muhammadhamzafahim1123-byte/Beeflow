@@ -17,10 +17,10 @@ Required environment variables:
 RESEND_API_KEY=
 RESEND_FROM_EMAIL=onboarding@resend.dev
 OTP_SECRET=
-DATABASE_URL=
 SESSION_SECRET=
+DATABASE_URL=
 ```
 
-OTP codes are sent by Resend, hashed before storage, expire in 10 minutes, allow 5 attempts, and authentication is stored in an HTTP-only session cookie.
+OTP codes are sent by Resend, hashed before storage, expire in 10 minutes, allow 5 attempts, and authentication is stored in an HTTP-only session cookie. This implementation uses Postgres through `DATABASE_URL` for OTPs, rate limits, users, and sessions.
 
 For production, replace `onboarding@resend.dev` with a verified sender on your own domain in Resend.

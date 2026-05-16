@@ -52,6 +52,10 @@ type Store = {
   checkCooldown(key: string, cooldownSeconds: number): Promise<RateLimitResult>;
 };
 
+export function hasPersistentOtpStore(): boolean {
+  return Boolean(process.env.DATABASE_URL);
+}
+
 declare global {
   // eslint-disable-next-line no-var
   var beeflowMemoryStore: MemoryStore | undefined;
