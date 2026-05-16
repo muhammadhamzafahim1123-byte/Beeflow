@@ -203,3 +203,277 @@ button {
   color: var(--yellow);
   border-color: rgba(213, 255, 39, 0.2);
 }
+
+.bf-shell {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.bf-sidebar {
+  padding: 18px 14px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+.bf-brand {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.bf-brand span {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: #000;
+  background: var(--yellow);
+  border-radius: 10px;
+  font-weight: 800;
+}
+
+.bf-brand strong,
+.bf-brand small {
+  display: block;
+}
+
+.bf-brand small,
+.bf-main p,
+.bf-empty p {
+  color: var(--muted);
+}
+
+.bf-sidebar nav {
+  display: grid;
+  gap: 5px;
+}
+
+.bf-sidebar button {
+  min-height: 40px;
+  padding: 0 12px;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.bf-sidebar button.active,
+.bf-sidebar button:hover {
+  color: var(--white);
+  background: var(--surface-2);
+}
+
+.bf-topbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 64px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bf-topbar div {
+  margin-right: auto;
+}
+
+.bf-topbar h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.bf-topbar p {
+  margin: 2px 0 0;
+  font-size: 12px;
+}
+
+.bf-page,
+.bf-main {
+  display: grid;
+  gap: 24px;
+}
+
+.bf-main {
+  align-content: start;
+}
+
+.bf-panel {
+  margin: 24px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+.bf-page .bf-panel {
+  margin: 0;
+}
+
+.bf-panel h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+.bf-setup,
+.bf-metrics,
+.bf-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.bf-setup button,
+.bf-metrics article,
+.bf-cards article,
+.bf-list article,
+.bf-empty {
+  padding: 18px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+.bf-setup button {
+  display: grid;
+  gap: 10px;
+  color: var(--white);
+  text-align: left;
+}
+
+.bf-setup button span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: #000;
+  background: var(--yellow);
+  border-radius: 50%;
+}
+
+.bf-metrics article {
+  min-height: 110px;
+}
+
+.bf-metrics span,
+.bf-metrics small {
+  color: var(--muted);
+}
+
+.bf-metrics strong {
+  display: block;
+  margin: 10px 0;
+  font-size: 28px;
+}
+
+.bf-list {
+  display: grid;
+  gap: 12px;
+}
+
+.bf-list article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 180px;
+  gap: 12px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.bf-list button,
+.bf-list select,
+.bf-drawer select,
+.bf-modal input {
+  min-height: 40px;
+  color: var(--white);
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.bf-empty {
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  text-align: center;
+}
+
+.bf-drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(480px, 100vw);
+  padding: 24px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: -24px 0 80px rgba(0, 0, 0, 0.45);
+}
+
+.bf-drawer .close {
+  float: right;
+}
+
+.bf-drawer label {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0;
+  color: var(--muted);
+}
+
+.bf-drawer button {
+  margin: 0 8px 8px 0;
+}
+
+.bf-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.bf-modal {
+  display: grid;
+  gap: 14px;
+  width: min(460px, calc(100vw - 32px));
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+.bf-modal h2 {
+  margin: 0;
+}
+
+.bf-modal div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.danger {
+  color: var(--yellow);
+  background: transparent;
+}
+
+@media (max-width: 900px) {
+  .bf-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .bf-sidebar nav {
+    grid-auto-flow: column;
+    overflow-x: auto;
+  }
+
+  .bf-setup,
+  .bf-metrics,
+  .bf-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .bf-list article {
+    grid-template-columns: 1fr;
+  }
+}
