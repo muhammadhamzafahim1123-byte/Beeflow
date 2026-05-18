@@ -4,10 +4,13 @@ Login is paused temporarily.
 
 Current temporary behavior:
 - `/` opens the BeeFlow product directly.
-- Auth components and API routes are still kept in the codebase.
+- `components/auth/LoginForm.tsx` and `components/auth/VerifyCodeForm.tsx` currently render the product instead of auth UI.
+- Google auth start/callback routes currently redirect to `/dashboard`.
+- Email OTP API routes are still kept in the codebase.
 
 When login should be restored:
 - Change `app/page.tsx` back to render `LoginForm`.
+- Restore the auth UI and Google OAuth route logic from commit `a4985ad` if needed.
 - Keep the existing auth setup:
   - `components/auth/LoginForm.tsx`
   - `components/auth/VerifyCodeForm.tsx`
