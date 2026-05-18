@@ -125,15 +125,15 @@ export default function BeeFlowApp({ mode = "dashboard" }: { mode?: "dashboard" 
       );
     }
 
-    if (view === "projects") return <SimpleCollection title="No projects yet." copy="Create your first project." items={projects} action={() => setModal("project")} actionLabel="New Project" />;
-    if (view === "team") return <SimpleCollection title="No team members yet." copy="Invite your first team member." items={team} action={() => setModal("team")} actionLabel="Invite Team" />;
-    if (view === "tasks" || view === "work") return <section className="bf-panel">{tasks.length ? <TaskList tasks={tasks} /> : <Empty title="No tasks yet." copy="Create your first task to start your workflow." />}</section>;
-    if (view === "review") return <section className="bf-panel"><h2>Review Hub</h2>{tasks.filter((task) => ["Ready for QA", "In QA", "Changes Required", "Rechecking", "Approved"].includes(task.status)).length ? <TaskList tasks={tasks.filter((task) => ["Ready for QA", "In QA", "Changes Required", "Rechecking", "Approved"].includes(task.status))} /> : <Empty title="No QA work yet." copy="Move a task to QA when it is ready for review." />}</section>;
-    if (view === "delivery") return <section className="bf-panel"><h2>Delivery</h2><Empty title="No delivery packages yet." copy="Approved delivery work will appear here." /></section>;
-    if (view === "figma") return <section className="bf-panel"><h2>Figma Work</h2><Empty title="No Figma links yet." copy="Add Figma metadata after creating a project or task." /></section>;
-    if (view === "docs") return <section className="bf-panel"><h2>Docs</h2><Empty title="No docs yet." copy="Create internal docs for SOPs and project notes." /></section>;
-    if (view === "files") return <section className="bf-panel"><h2>Files</h2><Empty title="No files yet." copy="Add external file and delivery links." /></section>;
-    return <section className="bf-panel"><h2>Settings</h2><p>Workspace: {workspace || "Not created yet"}</p><button className="primary" onClick={() => setModal("workspace")}>Create Workspace</button></section>;
+    if (view === "projects") return <div className="bf-page"><SimpleCollection title="No projects yet." copy="Create your first project." items={projects} action={() => setModal("project")} actionLabel="New Project" /></div>;
+    if (view === "team") return <div className="bf-page"><SimpleCollection title="No team members yet." copy="Invite your first team member." items={team} action={() => setModal("team")} actionLabel="Invite Team" /></div>;
+    if (view === "tasks" || view === "work") return <div className="bf-page"><section className="bf-panel">{tasks.length ? <TaskList tasks={tasks} /> : <Empty title="No tasks yet." copy="Create your first task to start your workflow." />}</section></div>;
+    if (view === "review") return <div className="bf-page"><section className="bf-panel"><h2>Review Hub</h2>{tasks.filter((task) => ["Ready for QA", "In QA", "Changes Required", "Rechecking", "Approved"].includes(task.status)).length ? <TaskList tasks={tasks.filter((task) => ["Ready for QA", "In QA", "Changes Required", "Rechecking", "Approved"].includes(task.status))} /> : <Empty title="No QA work yet." copy="Move a task to QA when it is ready for review." />}</section></div>;
+    if (view === "delivery") return <div className="bf-page"><section className="bf-panel"><h2>Delivery</h2><Empty title="No delivery packages yet." copy="Approved delivery work will appear here." /></section></div>;
+    if (view === "figma") return <div className="bf-page"><section className="bf-panel"><h2>Figma Work</h2><Empty title="No Figma links yet." copy="Add Figma metadata after creating a project or task." /></section></div>;
+    if (view === "docs") return <div className="bf-page"><section className="bf-panel"><h2>Docs</h2><Empty title="No docs yet." copy="Create internal docs for SOPs and project notes." /></section></div>;
+    if (view === "files") return <div className="bf-page"><section className="bf-panel"><h2>Files</h2><Empty title="No files yet." copy="Add external file and delivery links." /></section></div>;
+    return <div className="bf-page"><section className="bf-panel"><h2>Settings</h2><p>Workspace: {workspace || "Not created yet"}</p><button className="primary" onClick={() => setModal("workspace")}>Create Workspace</button></section></div>;
   }
 
   function TaskList({ tasks: visibleTasks }: { tasks: Task[] }) {
