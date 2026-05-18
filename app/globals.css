@@ -755,6 +755,18 @@ label small,
   background: var(--lemon);
 }
 
+.bf-nav-badge {
+  margin-left: auto;
+  min-width: 18px;
+  height: 18px;
+  display: inline-grid;
+  place-items: center;
+  color: #000;
+  background: var(--lemon);
+  border-radius: 999px;
+  font-size: 10px;
+}
+
 .bf-btn.primary {
   color: #000;
   background: var(--lemon);
@@ -790,4 +802,139 @@ label small,
   color: #ffe2e2;
   background: rgba(239, 68, 68, 0.14);
   border-color: rgba(239, 68, 68, 0.4);
+}
+
+.bf-btn.reject:disabled {
+  color: rgba(255, 226, 226, 0.35);
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.18);
+}
+
+.bf-close {
+  opacity: 1;
+  color: var(--text);
+}
+
+.bf-current-stage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+  padding: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.bf-current-stage span {
+  color: var(--lemon);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.bf-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0 0 8px;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  text-align: left;
+}
+
+.bf-section-toggle span {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.date-text.overdue,
+.date.overdue {
+  color: var(--red);
+}
+
+.date-text.soon,
+.date.soon {
+  color: var(--amber);
+}
+
+.date-text.week,
+.date.week {
+  color: var(--lemon);
+}
+
+.date-text.normal,
+.date.normal {
+  color: #6b7280;
+}
+
+.bf-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.bf-check input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--lemon);
+}
+
+.bf-comment-input,
+.bf-figma-url input {
+  background: #1a1a1a !important;
+  border: 0.5px solid #333 !important;
+  color: #ccc !important;
+}
+
+.bf-comment-input::placeholder,
+.bf-figma-url input::placeholder {
+  color: #555;
+}
+
+.bf-comment {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.mention {
+  color: #d4f040;
+  background: transparent;
+}
+
+.bf-activity {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.bf-inbox-list {
+  display: grid;
+  gap: 6px;
+}
+
+.bf-inbox-list button {
+  display: grid;
+  gap: 3px;
+  padding: 8px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  text-align: left;
+}
+
+.bf-inbox-list button.unread {
+  border-left: 3px solid var(--lemon);
+}
+
+.bf-inbox-list span,
+.bf-inbox-list small {
+  color: var(--muted);
+  font-size: 11px;
 }
