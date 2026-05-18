@@ -1,5 +1,5 @@
-import LoginForm from "@/components/auth/LoginForm";
+import BeeFlowApp from "@/components/app/BeeFlowApp";
 
 export default function Page() {
-  return <LoginForm />;
+  return <BeeFlowApp mode="dashboard" />;
 }

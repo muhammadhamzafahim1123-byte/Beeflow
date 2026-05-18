@@ -182,17 +182,11 @@ function setupSteps() {
 }
 
 function render() {
-  if (!state.meta.isAuthenticated) {
-    $("#app").innerHTML = renderLogin();
-    bindEvents();
-    return;
-  }
-
-  if (!state.meta.role) {
-    $("#app").innerHTML = renderRoleGate();
-    bindEvents();
-    return;
-  }
+  state.meta.isAuthenticated = true;
+  state.meta.role = state.meta.role || "Owner / Admin";
+  state.currentUser.name = state.currentUser.name || "Beenco User";
+  state.currentUser.email = state.currentUser.email || "team@beenco.io";
+  state.currentUser.avatar = state.currentUser.avatar || "BU";
 
   $("#app").innerHTML = `
     <div class="app-shell">
