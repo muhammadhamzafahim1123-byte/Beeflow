@@ -20,7 +20,7 @@ BeeFlow is now structured as an interactive internal workflow app instead of a l
 - Tasks: workflow board with status dropdowns.
 - Review Hub: QA tabs and QA issue tracking.
 - Delivery: approved work and final delivery packages.
-- Figma Work: metadata and external Figma links only.
+- Files: task-level deliverables, metadata, and external links only.
 - Docs: internal documentation editor modal.
 - Files: external file/deliverable metadata.
 - Team: invite team members from empty state.
@@ -29,10 +29,10 @@ BeeFlow is now structured as an interactive internal workflow app instead of a l
 ## Required Interactions
 
 - New Task, New Project, Invite Team, Create Workspace, Create Doc.
-- Add Figma Link, Add File Link, Add Reminder, Add QA Issue.
+- Add File Link, Add Reminder, Add QA Issue.
 - Create Delivery, create/manage tags, edit profile.
 - Star task, change status, move to QA, mark complete, reopen task, delete task.
-- Task drawer with details, comments, mentions, files, Figma links, reminders, and activity.
+- Task drawer with details, comments, mentions, files, reminders, and activity.
 - @mention suggestions appear while typing `@` in a comment.
 
 ## Visual System

@@ -3,5 +3,5 @@
 import BeeFlowApp from "@/components/app/BeeFlowApp";
 
 export default function VerifyCodeForm() {
-  return <BeeFlowApp mode="dashboard" />;
+  return <BeeFlowApp />;
 }

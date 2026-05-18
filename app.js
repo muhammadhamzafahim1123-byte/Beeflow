@@ -30,7 +30,6 @@ const navItems = [
   ["tasks", "Tasks", "tasks"],
   ["review", "Review Hub", "shieldCheck"],
   ["delivery", "Delivery", "folder"],
-  ["figma", "Figma Work", "figma"],
   ["docs", "Docs", "document"],
   ["files", "Files", "folder"],
   ["team", "Team", "users"],
@@ -44,7 +43,6 @@ const svgPaths = {
   tasks: '<path d="M5 5.5A1.5 1.5 0 0 1 6.5 4h11A1.5 1.5 0 0 1 19 5.5v1A1.5 1.5 0 0 1 17.5 8h-11A1.5 1.5 0 0 1 5 6.5v-1Zm0 6A1.5 1.5 0 0 1 6.5 10h8a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-1Zm0 6A1.5 1.5 0 0 1 6.5 16h11a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 18.5v-1Z"/>',
   users: '<path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7.2 1a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4ZM3 18.2C3 15.3 5.7 13 9 13s6 2.3 6 5.2c0 1-.8 1.8-1.8 1.8H4.8A1.8 1.8 0 0 1 3 18.2Zm12.7-3.8c.8-.3 1.7-.4 2.7-.2 1.9.4 3.6 1.9 3.6 3.9 0 .8-.7 1.5-1.5 1.5h-4c.3-.4.5-.9.5-1.4 0-1.4-.5-2.7-1.3-3.8Z"/>',
   shieldCheck: '<path d="M11.4 2.2a2 2 0 0 1 1.2 0l6 2.1A2 2 0 0 1 20 6.2v4.9c0 4.4-2.7 8.4-6.8 10.1a3 3 0 0 1-2.4 0A11 11 0 0 1 4 11.1V6.2a2 2 0 0 1 1.4-1.9l6-2.1Zm5.1 7.2a1 1 0 0 0-1.5-1.3l-3.8 4.4-1.7-1.7a1 1 0 1 0-1.4 1.4l2.5 2.5a1 1 0 0 0 1.5-.1l4.4-5.2Z"/>',
-  figma: '<path d="M9.5 3h3A3.5 3.5 0 0 1 16 6.5 3.5 3.5 0 0 1 12.5 10h-3a3.5 3.5 0 1 1 0-7Zm0 7h3a3.5 3.5 0 1 1 0 7h-3v-7Zm0 7H12a3.5 3.5 0 1 1-2.5 1.05V17Zm-3-7h3v7h-3a3.5 3.5 0 1 1 0-7Zm0-7h3v7h-3a3.5 3.5 0 1 1 0-7Z"/>',
   document: '<path d="M7 3h6.8c.5 0 1 .2 1.4.6l3.2 3.2c.4.4.6.9.6 1.4V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 1.8V8h3.2L14 4.8ZM8 12a1 1 0 0 0 0 2h8a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2H8Z"/>',
   folder: '<path d="M4 7a3 3 0 0 1 3-3h3.3c.8 0 1.5.3 2.1.9l1.2 1.2c.2.2.4.3.7.3H17a3 3 0 0 1 3 3v7.1a3.5 3.5 0 0 1-3.5 3.5h-9A3.5 3.5 0 0 1 4 16.5V7Z"/>',
   settings: '<path d="M10.8 2.5h2.4l.5 2a7.7 7.7 0 0 1 1.5.6l1.8-1.1 1.7 1.7-1.1 1.8c.3.5.5 1 .6 1.5l2 .5v2.4l-2 .5c-.1.5-.3 1-.6 1.5l1.1 1.8-1.7 1.7-1.8-1.1c-.5.3-1 .5-1.5.6l-.5 2h-2.4l-.5-2a7.7 7.7 0 0 1-1.5-.6L7 18.4l-1.7-1.7 1.1-1.8c-.3-.5-.5-1-.6-1.5l-2-.5v-2.4l2-.5c.1-.5.3-1 .6-1.5L5.3 5.7 7 4l1.8 1.1c.5-.3 1-.5 1.5-.6l.5-2ZM12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/>',
@@ -72,7 +70,6 @@ function defaultState() {
     docs: [],
     files: [],
     deliveries: [],
-    figma: [],
     qaIssues: [],
     reminders: [],
     notifications: [],
@@ -287,7 +284,6 @@ function renderView() {
     tasks: renderTasks,
     review: renderReview,
     delivery: renderDelivery,
-    figma: renderFigma,
     docs: renderDocs,
     files: renderFiles,
     team: renderTeam,
@@ -395,13 +391,6 @@ function renderDelivery() {
   `;
 }
 
-function renderFigma() {
-  return `
-    ${pageHead("Figma Work", "Store Figma links and frame metadata without embedding heavy files.", `<button class="primary" data-action="open-modal" data-modal="figma">Add Figma Link</button>`)}
-    <section class="panel">${state.figma.length ? `<div class="card-grid">${filtered(state.figma, ["fileName", "url", "pageName", "frameName", "status", "platform"]).map(renderFigmaCard).join("")}</div>` : emptyState("No Figma links yet.", "Add your first Figma file or frame link.")}</section>
-  `;
-}
-
 function renderDocs() {
   return `
     ${pageHead("Docs", "Create internal docs for guidelines, QA checklists, SOPs, and project notes.", `<button class="primary" data-action="open-modal" data-modal="doc">Create Doc</button>`)}
@@ -474,10 +463,6 @@ function renderTeamCard(member) {
   return `<article class="data-card"><div class="avatar">${initials(member.name || member.email)}</div><h3>${escapeHtml(member.name || "Unnamed")}</h3><p>${escapeHtml(member.email)}</p><div class="meta-row"><span>${escapeHtml(member.role)}</span><span>${escapeHtml(member.department)}</span><span>${escapeHtml(member.status)}</span></div></article>`;
 }
 
-function renderFigmaCard(item) {
-  return `<article class="data-card"><div class="card-top"><h3>${escapeHtml(item.fileName)}</h3><span class="pill">${escapeHtml(item.status)}</span></div><p>${escapeHtml(item.frameName || "No frame name.")}</p><div class="meta-row"><span>${escapeHtml(item.width)} x ${escapeHtml(item.height)}</span><span>${escapeHtml(item.aspectRatio)}</span><span>${escapeHtml(item.platform)}</span></div><button class="secondary" data-action="open-link" data-url="${escapeHtml(item.url)}">Open Figma</button></article>`;
-}
-
 function renderDocCard(doc) {
   return `<article class="data-card"><div class="card-top"><h3>${escapeHtml(doc.title)}</h3><span class="pill">${escapeHtml(doc.category)}</span></div><p>${escapeHtml(doc.content || "No content yet.")}</p></article>`;
 }
@@ -507,7 +492,6 @@ function renderTaskDrawer() {
   if (!task) return "";
   const comments = task.comments || [];
   const taskFiles = state.files.filter((file) => file.taskId === task.id);
-  const taskFigma = state.figma.filter((item) => item.taskId === task.id);
   const taskActivity = state.activity.filter((item) => item.taskId === task.id).slice(0, 8);
   return `
     <aside class="drawer slide-in">
@@ -521,7 +505,6 @@ function renderTaskDrawer() {
       </div>
       <div class="drawer-section"><h3>Details</h3>${detailLine("Project", projectName(task.projectId))}${detailLine("Assignee", personName(task.assigneeId))}${detailLine("Reviewer", personName(task.reviewerId))}${detailLine("Status", task.status)}${detailLine("Due date", task.dueDate || "No due date")}<div class="detail-line"><span>Tags</span><strong>${normalizeTags(task.tags).length ? normalizeTags(task.tags).map((tag) => `#${escapeHtml(tag)}`).join(" ") : "No tags"}</strong></div></div>
       <div class="drawer-section"><h3>Description</h3><p>${escapeHtml(task.description || "No description added.")}</p></div>
-      <div class="drawer-section"><h3>Figma links</h3>${taskFigma.length ? taskFigma.map((item) => `<p><button class="text-btn" data-action="open-link" data-url="${escapeHtml(item.url)}">${escapeHtml(item.fileName)}</button></p>`).join("") : `<p class="muted">No Figma link attached.</p>`}</div>
       <div class="drawer-section"><h3>Files</h3>${taskFiles.length ? taskFiles.map((file) => `<p><button class="text-btn" data-action="open-link" data-url="${escapeHtml(file.externalLink)}">${escapeHtml(file.fileName)}</button></p>`).join("") : `<p class="muted">No files attached.</p>`}</div>
       <div class="drawer-section">
         <h3>Comments</h3>
@@ -555,12 +538,11 @@ function modalContent(context) {
     team: { title: "Invite team member", submit: "Invite Team", body: field("name", "Name", "", "Full name", true) + field("email", "Email", "", "name@beenco.io", true, "email") + selectField("role", "Role", roles) + selectField("department", "Department", state.meta.departments.length ? state.meta.departments : departments) },
     project: { title: "New project", submit: "Create Project", body: field("name", "Project name", "", "", true) + field("client", "Client optional") + textArea("description", "Description") + selectField("managerId", "Manager", [state.currentUser, ...state.team].map((u) => u.id), "me", personName) + selectField("status", "Status", ["Not Started", "In Progress", "In Review", "In QA", "Changes Required", "Approved", "Ready for Delivery", "Delivered", "On Hold"]) + selectField("priority", "Priority", priorities, "Medium") + field("startDate", "Start date", todayISO(), "", false, "date") + field("dueDate", "Due date", "", "", false, "date") + field("tags", "Tags", "", "Web3, Design") },
     task: { title: "New task", submit: "Create Task", body: field("title", "Task title", "", "", true) + textArea("description", "Description") + selectFieldHtml("projectId", "Project", projectOptions()) + selectFieldHtml("assigneeId", "Assignee", userOptions("me")) + selectFieldHtml("reviewerId", "Reviewer", userOptions()) + selectField("priority", "Priority", priorities, "Medium") + selectField("status", "Status", taskStatuses, "Backlog") + selectField("taskType", "Task type", creativeTypes, "UI/UX Design") + field("dueDate", "Due date", "", "", false, "date") + field("tags", "Tags", "", "QA Required, Web3") + tagHint() + renderDesignFields() },
-    figma: { title: "Add Figma link", submit: "Save Figma Link", body: field("fileName", "Figma file name", "", "", true) + field("url", "Figma URL", "", "https://figma.com/...", true, "url") + field("pageName", "Page name") + field("frameName", "Frame name") + field("width", "Width", "", "1440", false, "number") + field("height", "Height", "", "900", false, "number") + field("aspectRatio", "Aspect ratio", "", "16:9") + field("platform", "Platform", "", "Website") + field("version", "Version", "v1") + selectField("status", "Status", ["Draft", "In Progress", "Ready for Review", "Changes Required", "Approved", "Final", "Exported", "Delivered"]) + selectFieldHtml("projectId", "Related project", projectOptions()) + selectFieldHtml("taskId", "Related task", taskOptions()) },
     file: { title: "Add file link", submit: "Save File", body: field("fileName", "File name", "", "", true) + selectField("fileType", "File type", ["Image", "Video", "Design File", "Document", "Source File", "ZIP Folder", "External Link"]) + field("size", "Size", "", "2.4 GB") + field("version", "Version", "v1") + selectField("status", "Status", ["Draft", "Internal Review", "QA Review", "Approved", "Final", "Delivered"]) + selectFieldHtml("projectId", "Related project", projectOptions()) + selectFieldHtml("taskId", "Related task", taskOptions()) + field("externalLink", "External link", "", "https://drive.google.com/...", true, "url") },
-    delivery: { title: "Create delivery", submit: "Create Delivery", body: field("title", "Delivery title", "", "", true) + selectFieldHtml("projectId", "Related project", projectOptions()) + selectFieldHtml("taskId", "Related task", taskOptions(taskId)) + field("finalLink", "Final delivery link", "", "https://drive.google.com/...", true, "url") + field("figmaLink", "Final Figma link", "", "https://figma.com/...") + selectField("status", "Status", ["Preparing", "Internal Review", "QA Approved", "Ready to Deliver", "Delivered"]) + textArea("notes", "Delivery notes") },
+    delivery: { title: "Create delivery", submit: "Create Delivery", body: field("title", "Delivery title", "", "", true) + selectFieldHtml("projectId", "Related project", projectOptions()) + selectFieldHtml("taskId", "Related task", taskOptions(taskId)) + field("finalLink", "Final delivery link", "", "https://drive.google.com/...", true, "url") + selectField("status", "Status", ["Preparing", "Internal Review", "QA Approved", "Ready to Deliver", "Delivered"]) + textArea("notes", "Delivery notes") },
     doc: { title: "Create doc", submit: "Create Doc", body: field("title", "Doc title", "", "", true) + selectField("category", "Category", docCategories) + textArea("content", "Content") + selectFieldHtml("projectId", "Related project", projectOptions()) + selectFieldHtml("taskId", "Related task", taskOptions()) },
     reminder: { title: "Add reminder", submit: "Save Reminder", body: selectField("preset", "Reminder option", ["Today", "Tomorrow", "Before due date", "Custom"]) + field("date", "Reminder date", todayISO(), "", false, "date") + field("time", "Reminder time", "09:00", "", false, "time") + field("note", "Reminder note", "", "Follow up") + `<input type="hidden" name="taskId" value="${taskId}" />` },
-    qaIssue: { title: "Add QA issue", submit: "Add QA Issue", body: field("title", "Issue title", "", "", true) + selectField("issueType", "Issue type", ["UI Issue", "UX Issue", "Size Issue", "Aspect Ratio Issue", "Export Issue", "Text Issue", "Design Mismatch", "Missing Requirement", "Mobile Issue", "File Issue", "Client Feedback"]) + selectField("priority", "Priority", priorities, "Medium") + selectFieldHtml("assignedTo", "Assigned to", userOptions()) + selectFieldHtml("taskId", "Task", taskOptions(taskId)) + field("screenshotUrl", "Screenshot/file link", "", "https://...") + field("figmaFrameUrl", "Figma frame link", "", "https://figma.com/...") + textArea("comment", "Comment") + selectField("status", "Status", qaStatuses) },
+    qaIssue: { title: "Add QA issue", submit: "Add QA Issue", body: field("title", "Issue title", "", "", true) + selectField("issueType", "Issue type", ["UI Issue", "UX Issue", "Size Issue", "Aspect Ratio Issue", "Export Issue", "Text Issue", "Design Mismatch", "Missing Requirement", "Mobile Issue", "File Issue", "Client Feedback"]) + selectField("priority", "Priority", priorities, "Medium") + selectFieldHtml("assignedTo", "Assigned to", userOptions()) + selectFieldHtml("taskId", "Task", taskOptions(taskId)) + field("screenshotUrl", "Screenshot/file link", "", "https://...") + textArea("comment", "Comment") + selectField("status", "Status", qaStatuses) },
   };
   return shared[type];
 }
@@ -655,7 +637,6 @@ function handleFormSubmit(event) {
     team: () => state.team.push({ id: uid("user"), name: data.name, email: data.email, role: data.role, department: data.department, status: "Active" }),
     project: () => state.projects.push({ id: uid("project"), ...data, teamMembers: [], createdAt: new Date().toISOString() }),
     task: () => createTask(data),
-    figma: () => state.figma.push({ id: uid("figma"), ...data, createdAt: new Date().toISOString() }),
     file: () => state.files.push({ id: uid("file"), ...data, uploadedBy: "me", date: todayISO(), createdAt: new Date().toISOString() }),
     delivery: () => createDelivery(data),
     doc: () => state.docs.push({ id: uid("doc"), ...data, ownerId: "me", createdAt: new Date().toISOString(), lastUpdated: todayISO() }),
@@ -854,7 +835,6 @@ function deleteTask(taskId) {
   if (!task) return;
   if (!confirm(`Delete task "${task.title}"? This cannot be undone.`)) return;
   state.tasks = state.tasks.filter((item) => item.id !== taskId);
-  state.figma = state.figma.filter((item) => item.taskId !== taskId);
   state.files = state.files.filter((item) => item.taskId !== taskId);
   state.qaIssues = state.qaIssues.filter((item) => item.taskId !== taskId);
   state.reminders = state.reminders.filter((item) => item.taskId !== taskId);
