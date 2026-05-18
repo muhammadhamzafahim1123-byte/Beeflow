@@ -271,6 +271,9 @@ button {
 }
 
 .bf-sidebar button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   min-height: 40px;
   padding: 0 12px;
   color: var(--muted);
@@ -284,6 +287,64 @@ button {
 .bf-sidebar button:hover {
   color: var(--white);
   background: var(--surface-2);
+}
+
+.bf-sidebar button.active::before {
+  content: "";
+  width: 3px;
+  height: 18px;
+  background: var(--yellow);
+  border-radius: 99px;
+}
+
+.bf-sidebar i {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: currentColor;
+  opacity: 0.75;
+  flex: 0 0 auto;
+}
+
+.bf-sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.bf-profile-card {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+}
+
+.bf-profile-card span,
+.bf-user-pill span {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: #000;
+  background: var(--yellow);
+  border-radius: 10px;
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+
+.bf-profile-card strong,
+.bf-profile-card small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bf-profile-card small {
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .bf-topbar {
@@ -321,6 +382,51 @@ button {
   width: 100%;
 }
 
+.bf-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(360px, 26vw);
+  min-width: 220px;
+  height: 42px;
+  padding: 0 14px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.bf-search input {
+  width: 100%;
+  min-width: 0;
+  color: var(--white);
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+
+.bf-icon-button,
+.bf-user-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  color: var(--white);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.bf-icon-button {
+  width: 42px;
+}
+
+.bf-user-pill {
+  gap: 9px;
+  padding: 0 12px 0 8px;
+  font-weight: 700;
+}
+
 .bf-page {
   display: grid;
   gap: 20px;
@@ -328,6 +434,28 @@ button {
   max-width: 1480px;
   margin: 0 auto;
   padding: 24px;
+}
+
+.bf-page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.bf-page-head h1 {
+  margin: 0;
+  font-size: clamp(26px, 3vw, 34px);
+}
+
+.bf-page-head p {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
+.bf-page-head > div:last-child {
+  display: flex;
+  gap: 10px;
 }
 
 .bf-panel {
@@ -345,8 +473,23 @@ button {
 }
 
 .bf-panel h2 {
-  margin: 0 0 16px;
+  margin: 0;
   font-size: 18px;
+}
+
+.bf-panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.bf-panel-title button {
+  color: var(--yellow);
+  background: transparent;
+  border: 0;
+  font-weight: 700;
 }
 
 .bf-setup,
@@ -388,6 +531,12 @@ button {
   border-radius: 50%;
 }
 
+.bf-setup button:not(.done) span {
+  color: transparent;
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
 .bf-metrics article {
   min-height: 110px;
 }
@@ -401,6 +550,12 @@ button {
   display: block;
   margin: 10px 0;
   font-size: 28px;
+}
+
+.bf-dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(320px, 0.95fr);
+  gap: 20px;
 }
 
 .bf-list {
@@ -547,6 +702,18 @@ button {
 
   .bf-page {
     padding: 16px;
+  }
+
+  .bf-search {
+    width: 100%;
+    min-width: 0;
+    order: 3;
+  }
+
+  .bf-dashboard-grid,
+  .bf-page-head {
+    grid-template-columns: 1fr;
+    display: grid;
   }
 
   .bf-panel {
