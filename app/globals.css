@@ -690,3 +690,104 @@ label small,
     padding: 8px;
   }
 }
+
+/* BeeFlow brand theme: compact black workspace with lemon focus accents. */
+:root {
+  --bg: #000000;
+  --surface: #080808;
+  --surface-2: #111111;
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #ffffff;
+  --muted: rgba(255, 255, 255, 0.58);
+  --lemon: #d5ff27;
+  --red: #ef4444;
+  --amber: #f59e0b;
+  --yellow: #d5ff27;
+  --green: #10b981;
+}
+
+.bf-logo rect {
+  fill: var(--lemon);
+}
+
+.bf-logo path {
+  fill: #000;
+}
+
+.bf-sidebar,
+.bf-topbar,
+.bf-setup,
+.bf-panel,
+.bf-lane,
+.bf-review,
+.bf-profile,
+.bf-member,
+.bf-note,
+.bf-task,
+.bf-rows button,
+.bf-drawer,
+.bf-close,
+.bf-modal,
+.bf-btn,
+.bf-panel select,
+.bf-modal input,
+.bf-modal select,
+.bf-drawer input,
+.bf-drawer select,
+.bf-review textarea,
+.bf-qa-actions textarea,
+.bf-drawer input[type="text"] {
+  background: var(--surface);
+}
+
+.bf-sidebar nav button.active,
+.bf-sidebar nav button:hover,
+.bf-profile-card,
+.bf-meta > span,
+.bf-files span,
+.bf-files b,
+.bf-profile span,
+.bf-btn:disabled {
+  background: var(--surface-2);
+}
+
+.bf-sidebar nav button.active::before {
+  background: var(--lemon);
+}
+
+.bf-btn.primary {
+  color: #000;
+  background: var(--lemon);
+  border-color: var(--lemon);
+}
+
+.bf-avatar {
+  color: #000;
+  background: var(--lemon);
+}
+
+.bf-stats article {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+.bf-capacity,
+.bf-progress {
+  background: var(--surface-2);
+}
+
+.bf-modal-backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.bf-btn.approve {
+  color: #dfffe8;
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.bf-btn.reject {
+  color: #ffe2e2;
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.4);
+}
