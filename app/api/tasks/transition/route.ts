@@ -11,6 +11,9 @@ export async function POST(request: NextRequest) {
       to?: PipelineStage;
       attachmentCount?: number;
       reviewerName?: string;
+      hasBrief?: boolean;
+      hasApproval?: boolean;
+      hasDeliveryConfirmation?: boolean;
     };
 
     if (!body.from || !body.to) {
@@ -21,7 +24,10 @@ export async function POST(request: NextRequest) {
       from: body.from,
       to: body.to,
       attachmentCount: Number(body.attachmentCount || 0),
-      reviewerName: body.reviewerName
+      reviewerName: body.reviewerName,
+      hasBrief: Boolean(body.hasBrief),
+      hasApproval: Boolean(body.hasApproval),
+      hasDeliveryConfirmation: Boolean(body.hasDeliveryConfirmation)
     });
 
     if (!result.ok) return NextResponse.json(result, { status: 409 });

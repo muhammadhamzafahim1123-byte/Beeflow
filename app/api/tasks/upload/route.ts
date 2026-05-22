@@ -5,11 +5,14 @@ export const dynamic = "force-dynamic";
 
 const MAX_SIZE = 50 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["application/pdf", "image/png", "image/jpeg", "video/mp4", "application/zip", "application/x-zip-compressed"]);
+const ALLOWED_EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".mp4", ".mov", ".zip"];
 
 export async function POST(request: NextRequest) {
   try {
     const form = await request.formData();
     const taskId = String(form.get("taskId") || "");
+    const attachmentKind = form.get("attachmentKind") === "brief" ? "brief" : "deliverable";
+    const folder = attachmentKind === "brief" ? "brief" : "deliverables";
     const figmaUrl = String(form.get("figmaUrl") || "");
     const file = form.get("file");
 
@@ -26,12 +29,16 @@ export async function POST(request: NextRequest) {
           name: "Figma URL",
           type: "application/x-figma-url",
           size: 0,
-          uploadedAt: new Date().toISOString()
+          uploadedAt: new Date().toISOString(),
+          kind: attachmentKind,
+          path: `${folder}/${taskId}/figma-url`
         }
       });
     }
     if (!(file instanceof File)) return NextResponse.json({ ok: false, message: "Choose a file to upload." }, { status: 400 });
-    if (!ALLOWED_TYPES.has(file.type)) return NextResponse.json({ ok: false, message: "File type is not supported." }, { status: 415 });
+    const fileName = file.name.toLowerCase();
+    const allowedByExtension = ALLOWED_EXTENSIONS.some((extension) => fileName.endsWith(extension));
+    if (!ALLOWED_TYPES.has(file.type) && !allowedByExtension) return NextResponse.json({ ok: false, message: "File type is not supported." }, { status: 415 });
     if (file.size > MAX_SIZE) return NextResponse.json({ ok: false, message: "File must be 50MB or smaller." }, { status: 413 });
 
     return NextResponse.json({
@@ -42,7 +49,9 @@ export async function POST(request: NextRequest) {
         name: file.name,
         type: file.type,
         size: file.size,
-        uploadedAt: new Date().toISOString()
+        uploadedAt: new Date().toISOString(),
+        kind: attachmentKind,
+        path: `${folder}/${taskId}/${file.name}`
       }
     });
   } catch {
