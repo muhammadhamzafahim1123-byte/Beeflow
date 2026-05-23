@@ -190,6 +190,12 @@ button {
   letter-spacing: 0;
 }
 
+.bf-icon-x-brand {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+}
+
 .bf-profile-card {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -3229,56 +3235,80 @@ body {
 .bf-brand-card-top,
 .bf-brand-card-footer {
   justify-content: space-between;
-}
-
-.bf-brand-card-actions,
-.bf-brand-x {
-  display: inline-flex;
   align-items: center;
-  gap: 7px;
-  min-height: 30px;
-  padding: 0 10px;
-  color: rgba(255, 255, 255, 0.74);
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
 }
 
 .bf-brand-card-actions {
   display: flex;
+  align-items: center;
+  justify-content: flex-end;
   gap: 8px;
+  flex-shrink: 0;
   padding: 0;
   background: transparent;
   border: 0;
 }
 
-.bf-brand-card-actions > span {
+.bf-brand-link {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  justify-content: center;
+  gap: 6px;
   min-height: 32px;
-  max-width: 128px;
+  height: 32px;
+  max-width: 136px;
   padding: 0 11px;
   overflow: hidden;
-  color: rgba(255, 255, 255, 0.74);
+  color: rgba(255, 255, 255, 0.78);
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
   white-space: nowrap;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.bf-brand-link span {
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.bf-brand-delete {
-  display: grid;
-  place-items: center;
+.bf-brand-link.bf-brand-link-icon {
   width: 32px;
+  min-width: 32px;
+  max-width: 32px;
+  padding: 0;
+}
+
+.bf-brand-link:not(.is-disabled):hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.bf-brand-link.is-disabled {
+  opacity: 0.48;
+  cursor: default;
+}
+
+.bf-brand-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  min-width: 32px;
   height: 32px;
+  padding: 0;
   color: rgba(255, 255, 255, 0.64);
   background: rgba(255, 255, 255, 0.055);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
+  cursor: pointer;
 }
 
 .bf-brand-delete:hover,
@@ -3293,10 +3323,10 @@ body {
   left: 50%;
   top: 50%;
   z-index: 6;
-  display: grid;
-  justify-items: start;
-  align-content: center;
-  gap: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
   width: min(360px, calc(100% - 36px));
   padding: 22px;
   color: var(--text);
@@ -3306,6 +3336,18 @@ body {
   box-shadow: 0 18px 55px rgba(0, 0, 0, 0.42);
   cursor: default;
   transform: translate(-50%, -50%);
+}
+
+.bf-brand-delete-confirm-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.bf-brand-delete-confirm-head strong {
+  flex: 1;
+  min-width: 0;
 }
 
 .bf-brand-card.confirming-delete::after {
@@ -3328,21 +3370,53 @@ body {
   line-height: 1.5;
 }
 
-.bf-brand-delete-confirm > span {
+.bf-brand-delete-confirm-actions {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+}
+
+.bf-brand-delete-confirm-actions .bf-btn {
+  min-height: 38px;
 }
 
 .bf-brand-delete-icon {
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   width: 42px;
   height: 42px;
   color: #ffe2e2;
   background: rgba(239, 68, 68, 0.15);
   border: 1px solid rgba(239, 68, 68, 0.35);
   border-radius: 999px;
+}
+
+.bf-brand-delete-icon .bf-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+.bf-brand-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.bf-brand-hero-main > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.bf-brand-hero-main .bf-brand-link {
+  max-width: none;
 }
 
 .bf-brand-card-body {

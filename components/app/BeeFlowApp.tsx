@@ -285,7 +285,7 @@ export default function BeeFlowApp() {
         <span className="bf-brand-card-top">
           <BrandAvatar brand={brand} />
           <span className="bf-brand-card-actions">
-            <span><Icon name="twitter" /> {brandHandle(brand) || "Add X"}</span>
+            <BrandSocialLinks brand={brand} />
             <button type="button" className="bf-brand-delete" onClick={(event) => { event.stopPropagation(); setConfirmDeleteBrandId(brand.id); }} aria-label={`Delete ${brand.name}`}><Icon name="trash" /></button>
           </span>
         </span>
@@ -298,7 +298,7 @@ export default function BeeFlowApp() {
           <span>{tasks.length} tasks</span>
           <span className="bf-brand-collabs">{collaborators.slice(0, 3).map((person) => <Avatar key={person.id || person.name} label={person.avatar} image={person.avatarImage} />)}{collaborators.length > 3 ? <small>+{collaborators.length - 3}</small> : null}</span>
         </span>
-        {confirming ? <span className="bf-brand-delete-confirm" onClick={(event) => event.stopPropagation()}><span className="bf-brand-delete-icon"><Icon name="trash" /></span><strong>Delete {brand.name}?</strong><small>This is permanent. The brand card, all tasks inside it, comments, inbox updates, delivery assets, and brief assets will be removed from this workspace.</small><span><button type="button" className="bf-btn secondary" onClick={() => setConfirmDeleteBrandId("")}>Keep brand</button><button type="button" className="bf-btn reject" onClick={() => deleteBrand(brand.id)}>Delete brand</button></span></span> : null}
+        {confirming ? <span className="bf-brand-delete-confirm" onClick={(event) => event.stopPropagation()}><span className="bf-brand-delete-confirm-head"><span className="bf-brand-delete-icon"><Icon name="trash" /></span><strong>Delete {brand.name}?</strong></span><small>This is permanent. The brand card, all tasks inside it, comments, inbox updates, delivery assets, and brief assets will be removed from this workspace.</small><span className="bf-brand-delete-confirm-actions"><button type="button" className="bf-btn secondary" onClick={() => setConfirmDeleteBrandId("")}>Keep brand</button><button type="button" className="bf-btn reject" onClick={() => deleteBrand(brand.id)}>Delete brand</button></span></span> : null}
       </article>
     );
   }
@@ -319,7 +319,7 @@ export default function BeeFlowApp() {
           <div className="bf-brand-hero-main">
             <BrandAvatar brand={brand} large />
             <div>
-              <span className="bf-brand-x"><Icon name="twitter" /> {brandHandle(brand) || "No X profile added"}</span>
+              <span className="bf-brand-link-row"><BrandSocialLinks brand={brand} showLabels /></span>
               <h3>{brand.name}</h3>
               <p>{brand.audience || brand.client || "Internal brand"}</p>
             </div>
@@ -357,6 +357,34 @@ export default function BeeFlowApp() {
 
   function brandHandle(brand: Project) {
     return cleanXHandle(brand.xProfile || "");
+  }
+
+  function BrandSocialLinks({ brand, showLabels = false }: { brand: Project; showLabels?: boolean }) {
+    const handle = brandHandle(brand);
+    const xUrl = brandXUrl(brand);
+    const websiteUrl = brandWebsiteUrl(brand);
+    return (
+      <>
+        {xUrl ? (
+          <a className="bf-brand-link" href={xUrl} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()} aria-label={`Open @${handle} on X`} title={`@${handle} on X`}>
+            <Icon name="twitter" />
+            {showLabels ? <span>@{handle}</span> : <span>{handle}</span>}
+          </a>
+        ) : (
+          <span className="bf-brand-link is-disabled" aria-hidden={showLabels}>
+            <Icon name="twitter" />
+            <span>{showLabels ? "No X profile" : "Add X"}</span>
+          </span>
+        )}
+        {websiteUrl ? (
+          <a className="bf-brand-link bf-brand-link-icon" href={websiteUrl} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()} aria-label="Open brand website" title="Open website">
+            <Icon name="website" />
+          </a>
+        ) : showLabels ? (
+          <span className="bf-brand-link bf-brand-link-icon is-disabled"><Icon name="website" /><span>No website</span></span>
+        ) : null}
+      </>
+    );
   }
 
   function brandXAvatarUrl(brand: Project) {
@@ -1480,6 +1508,17 @@ function xAvatarUrlForProject(project: Project) {
   return handle ? unavatarUrlForHandle(handle) : "";
 }
 
+function brandXUrl(brand: Project) {
+  const handle = cleanXHandle(brand.xProfile || "");
+  return handle ? `https://x.com/${encodeURIComponent(handle)}` : "";
+}
+
+function brandWebsiteUrl(brand: Project) {
+  const raw = (brand.website || "").trim();
+  if (!raw) return "";
+  return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+}
+
 function brandAvatarSrc(brand: Project) {
   const raw = brand.logoImage || xAvatarUrlForProject(brand);
   if (!raw) return "";
@@ -2082,14 +2121,21 @@ function Logo() {
   return <svg className="bf-logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" /><path d="M9 9h8.5c3 0 5 1.6 5 4.1 0 1.4-.7 2.5-2 3.1 1.7.6 2.6 1.8 2.6 3.5 0 2.7-2.2 4.3-5.6 4.3H9V9Z" /></svg>;
 }
 
-type IconName = "layout" | "check" | "inbox" | "folder" | "list" | "shield" | "send" | "delivery" | "fileText" | "paperclip" | "users" | "user" | "settings" | "plus" | "x" | "twitter" | "chevronRight" | "chevronDown" | "clock" | "upload" | "download" | "arrowRight" | "lock" | "medical" | "plane" | "education" | "home" | "alertCircle" | "calendarOff" | "edit" | "trash";
+type IconName = "layout" | "check" | "inbox" | "folder" | "list" | "shield" | "send" | "delivery" | "fileText" | "paperclip" | "users" | "user" | "settings" | "plus" | "x" | "twitter" | "website" | "chevronRight" | "chevronDown" | "clock" | "upload" | "download" | "arrowRight" | "lock" | "medical" | "plane" | "education" | "home" | "alertCircle" | "calendarOff" | "edit" | "trash";
 
 function Icon({ name }: { name: IconName }) {
   if (name === "layout") {
     return <span className="bf-icon bf-icon-dashboard" aria-hidden="true"><span /><span /><span /><span /></span>;
   }
   if (name === "twitter") {
-    return <span className="bf-icon bf-icon-x" aria-hidden="true">X</span>;
+    return (
+      <svg className="bf-icon bf-icon-x-brand" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+      </svg>
+    );
+  }
+  if (name === "website") {
+    return <i className="bf-icon fi fi-sr-globe" aria-hidden="true" />;
   }
   if (name === "delivery") {
     return (
@@ -2115,6 +2161,7 @@ function Icon({ name }: { name: IconName }) {
     plus: "fi-sr-plus",
     x: "fi-sr-cross-small",
     twitter: "",
+    website: "fi-sr-globe",
     chevronRight: "fi-sr-angle-small-right",
     chevronDown: "fi-sr-angle-small-down",
     clock: "fi-sr-clock",

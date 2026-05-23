@@ -11,6 +11,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head>
         <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css" />
+        <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-brands/css/uicons-brands.css" />
       </head>
       <body>{children}</body>
     </html>
