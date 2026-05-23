@@ -3071,13 +3071,17 @@ body {
 }
 
 .bf-brand-draft-preview .bf-brand-card-glow {
+  z-index: 0;
   opacity: 0.72;
   filter: blur(14px) saturate(1.35);
+  pointer-events: none;
 }
 
 .bf-brand-draft-preview .bf-brand-avatar {
   position: relative;
   z-index: 2;
+  isolation: isolate;
+  filter: none;
 }
 
 .bf-brand-photo-edit {
@@ -3377,6 +3381,14 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+  image-rendering: auto;
+}
+
+.bf-brand-avatar img,
+.bf-avatar img {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .bf-brand-avatar.has-image {

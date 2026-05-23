@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { unavatarUrlForHandle, upgradeProfileImageUrl } from "@/lib/profile-image-url";
 import { PIPELINE_STAGES, type PipelineStage } from "@/lib/workflow";
 
 type View = "dashboard" | "work" | "inbox" | "projects" | "review" | "delivery" | "docs" | "files" | "team" | "settings";
@@ -340,8 +341,8 @@ export default function BeeFlowApp() {
   }
 
   function BrandAvatar({ brand, large = false }: { brand: Project; large?: boolean }) {
-    const src = brand.logoImage || brandXAvatarUrl(brand);
-    return <span className={`bf-brand-avatar${large ? " large" : ""}${src ? " has-image" : ""}`}>{src ? <img src={src} alt="" /> : initials(brand.name)}</span>;
+    const src = brandAvatarSrc(brand);
+    return <span className={`bf-brand-avatar${large ? " large" : ""}${src ? " has-image" : ""}`}>{src ? <img src={src} alt="" decoding="async" /> : initials(brand.name)}</span>;
   }
 
   function brandCollaborators(projectId: string) {
@@ -981,7 +982,7 @@ export default function BeeFlowApp() {
       setErrors({ brandImage: "Choose an image file." });
       return;
     }
-    const [image, palette] = await Promise.all([makeProfileAvatarDataUrl(file), brandPaletteFromFile(file)]);
+    const [image, palette] = await Promise.all([makeBrandLogoDataUrl(file), brandPaletteFromFile(file)]);
     setBrandImageDraft(image);
     setBrandColorDraft(palette?.primary || "");
     setBrandSecondaryColorDraft(palette?.secondary || palette?.primary || "");
@@ -1471,12 +1472,19 @@ async function fetchXBrandAssets(handle: string) {
 async function fetchBrandLogoFromHandle(handle: string) {
   const assets = await fetchXBrandAssets(handle);
   if (assets.avatar) return proxiedBrandImageSrc(assets.avatar);
-  return proxiedBrandImageSrc(`https://unavatar.io/x/${encodeURIComponent(handle)}`);
+  return proxiedBrandImageSrc(unavatarUrlForHandle(handle));
 }
 
 function xAvatarUrlForProject(project: Project) {
   const handle = cleanXHandle(project.xProfile || "");
-  return handle ? `https://unavatar.io/x/${encodeURIComponent(handle)}` : "";
+  return handle ? unavatarUrlForHandle(handle) : "";
+}
+
+function brandAvatarSrc(brand: Project) {
+  const raw = brand.logoImage || xAvatarUrlForProject(brand);
+  if (!raw) return "";
+  if (raw.startsWith("data:") || raw.startsWith("/")) return raw;
+  return proxiedBrandImageSrc(raw);
 }
 
 function safePersistStore(store: Store) {
@@ -1527,12 +1535,24 @@ function normalizePersistedMember(person: Member, stripImages = false): Member {
   return { ...person, avatarImage };
 }
 
-function makeProfileAvatarDataUrl(file: File) {
+function drawSquareAvatarToCanvas(image: HTMLImageElement, canvas: HTMLCanvasElement, size: number) {
+  const context = canvas.getContext("2d");
+  if (!context) return;
+  const sourceSize = Math.min(image.naturalWidth, image.naturalHeight);
+  const sourceX = Math.max(0, (image.naturalWidth - sourceSize) / 2);
+  const sourceY = Math.max(0, (image.naturalHeight - sourceSize) / 2);
+  canvas.width = size;
+  canvas.height = size;
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.drawImage(image, sourceX, sourceY, sourceSize, sourceSize, 0, 0, size, size);
+}
+
+function makeBrandLogoDataUrl(file: File) {
   return new Promise<string>((resolve) => {
     const objectUrl = URL.createObjectURL(file);
     const image = new Image();
     image.onload = () => {
-      const size = 360;
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
       if (!context) {
@@ -1540,14 +1560,34 @@ function makeProfileAvatarDataUrl(file: File) {
         resolveWithFileReader(file, resolve);
         return;
       }
-      const sourceSize = Math.min(image.naturalWidth, image.naturalHeight);
-      const sourceX = Math.max(0, (image.naturalWidth - sourceSize) / 2);
-      const sourceY = Math.max(0, (image.naturalHeight - sourceSize) / 2);
-      canvas.width = size;
-      canvas.height = size;
-      context.drawImage(image, sourceX, sourceY, sourceSize, sourceSize, 0, 0, size, size);
+      drawSquareAvatarToCanvas(image, canvas, 512);
       URL.revokeObjectURL(objectUrl);
-      resolve(canvas.toDataURL("image/jpeg", 0.84));
+      const usePng = file.type === "image/png" || file.type === "image/webp";
+      resolve(canvas.toDataURL(usePng ? "image/png" : "image/jpeg", usePng ? undefined : 0.94));
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolveWithFileReader(file, resolve);
+    };
+    image.src = objectUrl;
+  });
+}
+
+function makeProfileAvatarDataUrl(file: File) {
+  return new Promise<string>((resolve) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      if (!context) {
+        URL.revokeObjectURL(objectUrl);
+        resolveWithFileReader(file, resolve);
+        return;
+      }
+      drawSquareAvatarToCanvas(image, canvas, 400);
+      URL.revokeObjectURL(objectUrl);
+      resolve(canvas.toDataURL("image/jpeg", 0.92));
     };
     image.onerror = () => {
       URL.revokeObjectURL(objectUrl);
@@ -1603,7 +1643,7 @@ async function brandImageSources(project: Project) {
 function proxiedBrandImageSrc(url: string) {
   if (!url) return "";
   if (url.startsWith("data:") || url.startsWith("/")) return url;
-  return `/api/brand/image-proxy?url=${encodeURIComponent(url)}`;
+  return `/api/brand/image-proxy?url=${encodeURIComponent(upgradeProfileImageUrl(url))}`;
 }
 
 function loadBrandImageElement(src: string) {

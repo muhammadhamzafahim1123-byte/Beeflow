@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { upgradeProfileImageUrl } from "@/lib/profile-image-url";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
-  const url = request.nextUrl.searchParams.get("url");
-  if (!url || !/^https:\/\//i.test(url)) {
+  const rawUrl = request.nextUrl.searchParams.get("url");
+  if (!rawUrl || !/^https:\/\//i.test(rawUrl)) {
     return new NextResponse("Invalid image url.", { status: 400 });
   }
+  const url = upgradeProfileImageUrl(rawUrl);
 
   try {
     const response = await fetch(url, {
