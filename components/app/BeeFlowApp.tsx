@@ -27,7 +27,7 @@ type Member = {
 };
 type Project = { id: string; name: string; client: string; ownerId: string; xProfile?: string; website?: string; description?: string; audience?: string; logoImage?: string; brandAccent?: string; brandAccentSecondary?: string; brandPaletteVersion?: number };
 type BrandPalette = { primary: string; secondary: string };
-const BRAND_PALETTE_VERSION = 3;
+const BRAND_PALETTE_VERSION = 4;
 type Activity = { id: string; actor: string; action: string; at: string };
 type Comment = { id: string; author: string; text: string; at: string; authorId?: string; attachments?: FileItem[] };
 type Subtask = { id: string; label: string; done: boolean };
@@ -102,6 +102,7 @@ export default function BeeFlowApp() {
   const [brandImageDraft, setBrandImageDraft] = useState("");
   const [brandColorDraft, setBrandColorDraft] = useState("");
   const [brandSecondaryColorDraft, setBrandSecondaryColorDraft] = useState("");
+  const [creatingBrand, setCreatingBrand] = useState(false);
   const [leaveDraft, setLeaveDraft] = useState<{ type: LeaveType; from: string; to: string }>({ type: "personal", from: "", to: "" });
   const [leaveDatePicker, setLeaveDatePicker] = useState<"" | "from" | "to">("");
   const [leaveCalendarMonth, setLeaveCalendarMonth] = useState(monthKey(new Date()));
@@ -138,7 +139,7 @@ export default function BeeFlowApp() {
     if (!hydrated) return;
     const brandsToExtract = store.projects.filter((project) => {
       const hasSource = Boolean(project.logoImage || cleanXHandle(project.xProfile || ""));
-      return hasSource && project.brandPaletteVersion !== BRAND_PALETTE_VERSION;
+      return hasSource && (project.brandPaletteVersion !== BRAND_PALETTE_VERSION || !project.brandAccent);
     });
     if (!brandsToExtract.length) return;
     let cancelled = false;
@@ -603,7 +604,7 @@ export default function BeeFlowApp() {
           </> : isProfile ? <>
             <div className="bf-profile-photo-edit"><Avatar label={initials(currentUser.name)} image={profileImageDraft === "__remove__" ? "" : profileImageDraft || currentUser.avatarImage} /><label>Profile picture<input type="file" accept="image/png,image/jpeg,image/webp" onChange={readProfileImage} /></label><button type="button" className="bf-btn secondary" onClick={() => setProfileImageDraft("__remove__")}><Icon name="x" /> Remove photo</button></div><Field name="name" label="Full name" defaultValue={currentUser.name} error={errors.name} /><Field name="role" label="Designation" defaultValue={currentUser.role} error={errors.role} /><Field name="department" label="Department / team" defaultValue={currentUser.department} /><Field name="profileAccess" label="Access / owner label" defaultValue={currentUser.profileAccess ?? "BeeFlow owner"} /><label>About<textarea name="profileAbout" defaultValue={currentUser.profileAbout ?? ""} /></label><Field name="goalTitle" label="Goal title" defaultValue={currentUser.goalTitle ?? ""} /><label>Goal description<textarea name="goalDescription" defaultValue={currentUser.goalDescription ?? ""} /></label>
           </> : modal === "project" ? <BrandFields /> : <Field name="title" label="Member name" error={errors.title} />}
-          <div className="bf-modal-actions">{isLeave && currentUser.leaveFrom ? <button type="button" className="bf-btn secondary" onClick={clearLeave}><Icon name="x" /> Clear leave</button> : null}<button type="button" className="bf-btn secondary" onClick={closeModal}><Icon name="x" /> Cancel</button>{isTaskEditor && !store.projects.length ? null : <button className="bf-btn primary"><Icon name="check" /> Save</button>}</div>
+          <div className="bf-modal-actions">{isLeave && currentUser.leaveFrom ? <button type="button" className="bf-btn secondary" onClick={clearLeave}><Icon name="x" /> Clear leave</button> : null}<button type="button" className="bf-btn secondary" onClick={closeModal} disabled={creatingBrand}><Icon name="x" /> Cancel</button>{isTaskEditor && !store.projects.length ? null : <button className="bf-btn primary" disabled={creatingBrand}><Icon name="check" /> {creatingBrand ? "Pulling brand colors..." : "Save"}</button>}</div>
         </form>
       </div>
     );
@@ -614,10 +615,29 @@ export default function BeeFlowApp() {
   }
 
   function BrandFields() {
+    const draftStyle = brandAccentStyle({
+      id: "draft",
+      name: "Brand",
+      client: "",
+      ownerId: currentUserId,
+      logoImage: brandImageDraft,
+      brandAccent: brandColorDraft,
+      brandAccentSecondary: brandSecondaryColorDraft || brandColorDraft
+    });
     return <>
-      <div className="bf-brand-photo-edit"><BrandAvatar brand={{ id: "draft", name: "Brand", client: "", ownerId: currentUserId, logoImage: brandImageDraft }} /><label>Brand logo / profile picture<input name="logo" type="file" accept="image/png,image/jpeg,image/webp" onChange={readBrandImage} /></label></div>
+      <div className="bf-brand-photo-edit" style={draftStyle}>
+        <span className="bf-brand-draft-preview">
+          <span className="bf-brand-card-glow">
+            <span className="bf-liquid-blob bf-liquid-blob-1" />
+            <span className="bf-liquid-blob bf-liquid-blob-2" />
+            <span className="bf-liquid-blob bf-liquid-blob-3" />
+          </span>
+          <BrandAvatar brand={{ id: "draft", name: "Brand", client: "", ownerId: currentUserId, logoImage: brandImageDraft }} />
+        </span>
+        <label>Brand logo / profile picture<input name="logo" type="file" accept="image/png,image/jpeg,image/webp" onChange={readBrandImage} /></label>
+      </div>
       <Field name="title" label="Brand name" error={errors.title} />
-      <Field name="xProfile" label="X profile or handle" />
+      <label>X profile or handle<input name="xProfile" placeholder="@brand or https://x.com/brand" onBlur={(event) => void previewBrandPaletteFromX(event.currentTarget.value)} />{errors.xProfile ? <small>{errors.xProfile}</small> : null}</label>
       <Field name="website" label="Website" />
       <Field name="client" label="Client / owner label" defaultValue="Internal" />
       <label>Brand notes<textarea name="description" placeholder="What should the team know about this brand?" /></label>
@@ -818,21 +838,87 @@ export default function BeeFlowApp() {
     setModal("");
   }
 
-  function createSimple(e: React.FormEvent<HTMLFormElement>) {
+  async function createSimple(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const title = String(data.get("title") || "").trim();
     if (title.length < 3) return setErrors({ title: "Minimum 3 characters." });
-    const brandId = crypto.randomUUID();
-    setStore((s) => modal === "project" ? { ...s, projects: [...s.projects, { id: brandId, name: title, client: String(data.get("client") || "Internal").trim() || "Internal", ownerId: currentUserId, xProfile: String(data.get("xProfile") || "").trim(), website: String(data.get("website") || "").trim(), description: String(data.get("description") || "").trim(), audience: String(data.get("audience") || "").trim(), logoImage: brandImageDraft, brandAccent: brandColorDraft, brandAccentSecondary: brandSecondaryColorDraft || brandColorDraft, brandPaletteVersion: brandColorDraft ? BRAND_PALETTE_VERSION : undefined }] } : { ...s, members: [...s.members, { id: crypto.randomUUID(), name: title, role: "Designer", department: "Creative", avatar: initials(title), capacity: 35 }] });
+
     if (modal === "project") {
-      setView("projects");
-      setSelectedProjectId(brandId);
+      setCreatingBrand(true);
+      try {
+        const identity = resolveBrandIdentity(title, String(data.get("xProfile") || "").trim());
+        if (!identity.name || identity.name.length < 3) {
+          return setErrors({ title: "Minimum 3 characters." });
+        }
+        const brandId = crypto.randomUUID();
+        let logoImage = brandImageDraft;
+        if (!logoImage && identity.xProfile) {
+          logoImage = await fetchBrandLogoFromHandle(identity.xProfile);
+        }
+        const draftProject: Project = {
+          id: brandId,
+          name: identity.name,
+          client: String(data.get("client") || "Internal").trim() || "Internal",
+          ownerId: currentUserId,
+          xProfile: identity.xProfile,
+          website: String(data.get("website") || "").trim(),
+          description: String(data.get("description") || "").trim(),
+          audience: String(data.get("audience") || "").trim(),
+          logoImage
+        };
+        const palette = brandColorDraft
+          ? { primary: brandColorDraft, secondary: brandSecondaryColorDraft || brandColorDraft }
+          : await brandPaletteForProject(draftProject);
+        setStore((s) => ({
+          ...s,
+          projects: [...s.projects, {
+            ...draftProject,
+            brandAccent: palette?.primary || "",
+            brandAccentSecondary: palette?.secondary || palette?.primary || "",
+            brandPaletteVersion: palette ? BRAND_PALETTE_VERSION : undefined
+          }]
+        }));
+        setView("projects");
+        setSelectedProjectId(brandId);
+        setBrandImageDraft("");
+        setBrandColorDraft("");
+        setBrandSecondaryColorDraft("");
+        setModal("");
+        setErrors({});
+      } finally {
+        setCreatingBrand(false);
+      }
+      return;
     }
-    setBrandImageDraft("");
-    setBrandColorDraft("");
-    setBrandSecondaryColorDraft("");
+
+    setStore((s) => ({
+      ...s,
+      members: [...s.members, { id: crypto.randomUUID(), name: title, role: "Designer", department: "Creative", avatar: initials(title), capacity: 35 }]
+    }));
     setModal("");
+    setErrors({});
+  }
+
+  async function previewBrandPaletteFromX(value: string) {
+    const xProfile = cleanXHandle(value);
+    if (!xProfile && !brandImageDraft) return;
+    let logoImage = brandImageDraft;
+    if (!logoImage && xProfile) {
+      logoImage = await fetchBrandLogoFromHandle(xProfile);
+      if (logoImage) setBrandImageDraft(logoImage);
+    }
+    const palette = await brandPaletteForProject({
+      id: "draft",
+      name: xProfile || "Brand",
+      client: "",
+      ownerId: currentUserId,
+      xProfile,
+      logoImage
+    });
+    if (!palette) return;
+    setBrandColorDraft(palette.primary);
+    setBrandSecondaryColorDraft(palette.secondary);
   }
 
   function closeModal() {
@@ -1352,6 +1438,42 @@ function cleanXHandle(value: string) {
     .trim();
 }
 
+function isXProfileUrl(value: string) {
+  return /(?:twitter|x)\.com/i.test(value);
+}
+
+function resolveBrandIdentity(nameInput: string, xProfileInput: string) {
+  const xFromField = cleanXHandle(xProfileInput);
+  const xFromName = isXProfileUrl(nameInput) ? cleanXHandle(nameInput) : "";
+  const xProfile = xFromField || xFromName;
+  let name = nameInput.trim();
+  if (isXProfileUrl(name)) {
+    name = xProfile || name;
+  }
+  if (name.startsWith("@")) name = name.slice(1);
+  return { name, xProfile };
+}
+
+async function fetchXBrandAssets(handle: string) {
+  try {
+    const response = await fetch(`/api/brand/x-assets?handle=${encodeURIComponent(handle)}`);
+    if (!response.ok) return { avatar: "", banner: "" };
+    const data = await response.json() as { avatar?: string; banner?: string };
+    return {
+      avatar: typeof data.avatar === "string" ? data.avatar : "",
+      banner: typeof data.banner === "string" ? data.banner : ""
+    };
+  } catch {
+    return { avatar: "", banner: "" };
+  }
+}
+
+async function fetchBrandLogoFromHandle(handle: string) {
+  const assets = await fetchXBrandAssets(handle);
+  if (assets.avatar) return proxiedBrandImageSrc(assets.avatar);
+  return proxiedBrandImageSrc(`https://unavatar.io/x/${encodeURIComponent(handle)}`);
+}
+
 function xAvatarUrlForProject(project: Project) {
   const handle = cleanXHandle(project.xProfile || "");
   return handle ? `https://unavatar.io/x/${encodeURIComponent(handle)}` : "";
@@ -1470,20 +1592,12 @@ async function brandImageSources(project: Project) {
   if (project.logoImage) sources.push(project.logoImage);
   const handle = cleanXHandle(project.xProfile || "");
   if (handle) {
-    try {
-      const response = await fetch(`/api/brand/x-assets?handle=${encodeURIComponent(handle)}`);
-      if (response.ok) {
-        const assets = await response.json() as { avatar?: string; banner?: string };
-        if (assets.avatar) sources.push(proxiedBrandImageSrc(assets.avatar));
-        if (assets.banner) sources.push(proxiedBrandImageSrc(assets.banner));
-      }
-    } catch {
-      // Fall back to avatar proxy below.
-    }
-    const avatar = xAvatarUrlForProject(project);
-    if (avatar) sources.push(proxiedBrandImageSrc(avatar));
+    const assets = await fetchXBrandAssets(handle);
+    if (assets.avatar) sources.push(proxiedBrandImageSrc(assets.avatar));
+    if (assets.banner) sources.push(proxiedBrandImageSrc(assets.banner));
+    if (!assets.avatar) sources.push(proxiedBrandImageSrc(xAvatarUrlForProject(project)));
   }
-  return [...new Set(sources)];
+  return [...new Set(sources.filter(Boolean))];
 }
 
 function proxiedBrandImageSrc(url: string) {
@@ -1523,7 +1637,7 @@ function accumulateBrandColorBuckets(image: CanvasImageSource, buckets: Map<stri
   const width = image instanceof HTMLImageElement ? image.naturalWidth || 64 : 64;
   const height = image instanceof HTMLImageElement ? image.naturalHeight || 64 : 64;
   const longest = Math.max(width, height, 1);
-  const size = Math.min(96, Math.max(56, longest));
+  const size = Math.min(128, Math.max(72, longest));
   canvas.width = size;
   canvas.height = size;
   try {
@@ -1540,12 +1654,12 @@ function accumulateBrandColorBuckets(image: CanvasImageSource, buckets: Map<stri
       const saturation = max - min;
       const brightness = (red + green + blue) / 3;
       if (brightness < 10) continue;
-      const isBrandLight = brightness > 210 && saturation < 40;
-      const isBrandVivid = saturation >= 36;
+      const isBrandLight = brightness > 205 && saturation < 42;
+      const isBrandVivid = saturation >= 24;
       if (!isBrandLight && !isBrandVivid) continue;
       if (brightness > 248 && saturation < 18) continue;
-      const vividness = isBrandLight ? 0.55 : saturation / 255;
-      const pixelWeight = alpha * Math.max(0.08, vividness * vividness * 5.5);
+      const vividness = isBrandLight ? 0.5 : saturation / 255;
+      const pixelWeight = alpha * Math.max(0.1, vividness * vividness * (isBrandVivid ? 7 : 4));
       const key = brandColorBucketKey(red, green, blue);
       const current = buckets.get(key) || { r: 0, g: 0, b: 0, score: 0 };
       current.r += red * pixelWeight;
@@ -1575,8 +1689,8 @@ function pickBrandPaletteFromBuckets(buckets: Map<string, BrandColorBucket>): Br
   const primary = rgbToHex(ranked[0].rgb);
   const secondaryEntry = ranked.find((item, index) => {
     if (index === 0) return false;
-    if (item.score < ranked[0].score * 0.1) return false;
-    return rgbDistance(ranked[0].rgb, item.rgb) >= 42;
+    if (item.score < ranked[0].score * 0.06) return false;
+    return rgbDistance(ranked[0].rgb, item.rgb) >= 34;
   });
   const secondary = secondaryEntry ? rgbToHex(secondaryEntry.rgb) : primary;
   return { primary, secondary };
@@ -1587,7 +1701,7 @@ function isUsableBrandRgb([r, g, b]: [number, number, number]) {
   const min = Math.min(r, g, b);
   const saturation = max - min;
   const brightness = (r + g + b) / 3;
-  return saturation >= 36 || brightness >= 205;
+  return saturation >= 24 || brightness >= 200;
 }
 
 function rgbDistance(a: [number, number, number], b: [number, number, number]) {

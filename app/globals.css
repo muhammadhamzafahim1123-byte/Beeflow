@@ -3058,6 +3058,33 @@ body {
   gap: 18px;
 }
 
+.bf-brand-draft-preview {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 92px;
+  height: 92px;
+  overflow: hidden;
+  background: #000;
+  border-radius: 999px;
+  isolation: isolate;
+}
+
+.bf-brand-draft-preview .bf-brand-card-glow {
+  opacity: 0.72;
+  filter: blur(14px) saturate(1.35);
+}
+
+.bf-brand-draft-preview .bf-brand-avatar {
+  position: relative;
+  z-index: 2;
+}
+
+.bf-brand-photo-edit {
+  display: grid;
+  gap: 12px;
+}
+
 .bf-brand-card {
   --brand-accent: var(--lemon);
   --brand-accent-rgb: 213 255 39;
@@ -3104,16 +3131,17 @@ body {
 .bf-brand-hero-glow {
   position: absolute;
   inset: 0;
+  z-index: 0;
   background:
-    radial-gradient(ellipse at 18% 18%, rgb(var(--brand-accent-rgb) / 0.2), transparent 28%),
-    radial-gradient(ellipse at 86% 18%, rgb(var(--brand-glow-b-rgb, var(--brand-accent-rgb)) / 0.16), transparent 32%),
-    radial-gradient(ellipse at 32% 88%, rgb(var(--brand-accent-rgb) / 0.14), transparent 36%),
-    radial-gradient(ellipse at 90% 78%, rgb(var(--brand-glow-b-rgb, var(--brand-accent-rgb)) / 0.18), transparent 36%),
-    linear-gradient(125deg, rgb(var(--brand-accent-rgb) / 0.05), transparent 42%, rgb(var(--brand-glow-b-rgb, var(--brand-accent-rgb)) / 0.06), transparent 74%);
+    radial-gradient(ellipse at 18% 18%, rgb(var(--brand-accent-rgb) / 0.26), transparent 28%),
+    radial-gradient(ellipse at 86% 18%, rgb(var(--brand-glow-b-rgb, var(--brand-accent-rgb)) / 0.22), transparent 32%),
+    radial-gradient(ellipse at 32% 88%, rgb(var(--brand-accent-rgb) / 0.18), transparent 36%),
+    radial-gradient(ellipse at 90% 78%, rgb(var(--brand-glow-b-rgb, var(--brand-accent-rgb)) / 0.24), transparent 36%),
+    linear-gradient(125deg, rgb(var(--brand-accent-rgb) / 0.1), transparent 42%, rgb(var(--brand-glow-b-rgb, var(--brand-accent-rgb)) / 0.12), transparent 74%);
   background-size: 155% 155%, 165% 165%, 180% 180%, 160% 160%, 220% 220%;
   background-position: 0% 0%, 100% 0%, 45% 100%, 100% 100%, 0% 50%;
-  filter: blur(18px) saturate(1.24);
-  opacity: 0.58;
+  filter: blur(18px) saturate(1.35);
+  opacity: 0.68;
   pointer-events: none;
   transform: scale(1.04);
   animation: bf-liquid-mesh 8s ease-in-out infinite alternate;
@@ -3170,11 +3198,14 @@ body {
 }
 
 .bf-brand-card-top,
+.bf-brand-card-body,
 .bf-brand-card-footer,
+.bf-brand-workload,
 .bf-brand-hero-main,
 .bf-brand-hero-stats,
 .bf-brand-person {
   position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -3565,7 +3596,7 @@ body {
   height: 140px;
   left: 10%;
   top: 15%;
-  opacity: 0.52;
+  opacity: 0.62;
   background: radial-gradient(circle, rgb(var(--brand-accent-rgb, 138 138 148) / 0.9) 0%, transparent 72%);
   animation: bf-float-blob-1 25s ease-in-out infinite;
 }
@@ -3575,7 +3606,7 @@ body {
   height: 160px;
   right: 15%;
   bottom: 20%;
-  opacity: 0.46;
+  opacity: 0.56;
   background: radial-gradient(circle, rgb(var(--brand-glow-b-rgb, var(--brand-accent-rgb)) / 0.88) 0%, transparent 72%);
   animation: bf-float-blob-2 30s ease-in-out infinite;
 }
@@ -3585,7 +3616,7 @@ body {
   height: 120px;
   left: 45%;
   top: 45%;
-  opacity: 0.4;
+  opacity: 0.5;
   background: radial-gradient(circle, rgb(var(--brand-accent-rgb, 138 138 148) / 0.55) 0%, rgb(var(--brand-glow-b-rgb, var(--brand-accent-rgb)) / 0.5) 48%, transparent 74%);
   animation: bf-float-blob-3 22s ease-in-out infinite;
 }
