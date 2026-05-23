@@ -3054,8 +3054,14 @@ body {
 
 .bf-brand-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+}
+
+@media (max-width: 720px) {
+  .bf-brand-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .bf-brand-draft-preview {
@@ -3120,10 +3126,12 @@ body {
     radial-gradient(circle at 76% 24%, rgb(var(--brand-glow-b-rgb, var(--brand-accent-rgb)) / 0.1), transparent 32%),
     radial-gradient(circle at 42% 84%, rgb(var(--brand-accent-rgb) / 0.1), transparent 34%),
     radial-gradient(circle at 88% 78%, rgb(var(--brand-glow-b-rgb, var(--brand-accent-rgb)) / 0.12), transparent 36%);
+  background-size: 150% 150%, 160% 160%, 170% 170%, 165% 165%;
+  background-position: 0% 20%, 100% 0%, 50% 100%, 90% 80%;
   opacity: 0.56;
   pointer-events: none;
   transform: translateZ(0);
-  animation: bf-liquid-depth 9s ease-in-out infinite alternate;
+  animation: bf-liquid-bg 22s ease-in-out infinite;
 }
 
 .bf-brand-card:hover {
@@ -3144,11 +3152,11 @@ body {
     linear-gradient(125deg, rgb(var(--brand-accent-rgb) / 0.1), transparent 42%, rgb(var(--brand-glow-b-rgb, var(--brand-accent-rgb)) / 0.12), transparent 74%);
   background-size: 155% 155%, 165% 165%, 180% 180%, 160% 160%, 220% 220%;
   background-position: 0% 0%, 100% 0%, 45% 100%, 100% 100%, 0% 50%;
-  filter: blur(18px) saturate(1.35);
+  filter: blur(20px) saturate(1.3);
   opacity: 0.68;
   pointer-events: none;
-  transform: scale(1.04);
-  animation: bf-liquid-mesh 8s ease-in-out infinite alternate;
+  transform: scale(1.05);
+  animation: bf-liquid-mesh 24s ease-in-out infinite;
   mix-blend-mode: normal;
 }
 
@@ -3160,43 +3168,46 @@ body {
 }
 
 @keyframes bf-liquid-mesh {
-  0% {
-    background-position: 0% 0%, 100% 0%, 42% 100%, 100% 100%, 0% 50%;
-    transform: scale(1.04) rotateX(0deg) rotateY(0deg);
+  0%,
+  100% {
+    background-position: 0% 12%, 100% 0%, 42% 100%, 100% 88%, 0% 50%;
+    transform: scale(1.04);
+    opacity: 0.62;
   }
 
   50% {
-    background-position: 28% 20%, 72% 30%, 60% 78%, 78% 70%, 70% 50%;
-    transform: scale(1.08) rotateX(3deg) rotateY(-4deg);
-  }
-
-  100% {
-    background-position: 8% 32%, 92% 10%, 32% 70%, 68% 92%, 100% 50%;
-    transform: scale(1.05) rotateX(-2deg) rotateY(3deg);
+    background-position: 100% 88%, 0% 24%, 68% 0%, 24% 100%, 100% 50%;
+    transform: scale(1.08);
+    opacity: 0.74;
   }
 }
 
-@keyframes bf-liquid-depth {
-  0% {
-    transform: translate3d(-1%, 0, 0) scale(1);
+@keyframes bf-liquid-bg {
+  0%,
+  100% {
+    background-position: 0% 24%, 100% 0%, 48% 100%, 92% 76%;
+    opacity: 0.52;
   }
 
   50% {
-    transform: translate3d(1.5%, -1%, 0) scale(1.03);
-  }
-
-  100% {
-    transform: translate3d(0, 1%, 0) scale(1.01);
+    background-position: 100% 76%, 0% 36%, 18% 0%, 58% 100%;
+    opacity: 0.66;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .bf-brand-card::before,
+  .bf-brand-hero::before,
   .bf-brand-card-glow,
   .bf-brand-card-glow::before,
   .bf-brand-card-glow::after,
   .bf-brand-hero-glow,
   .bf-brand-hero-glow::before,
-  .bf-brand-hero-glow::after {
+  .bf-brand-hero-glow::after,
+  .bf-liquid-blob,
+  .bf-liquid-blob-1,
+  .bf-liquid-blob-2,
+  .bf-liquid-blob-3 {
     animation: none;
   }
 }
@@ -3610,7 +3621,8 @@ body {
   top: 15%;
   opacity: 0.62;
   background: radial-gradient(circle, rgb(var(--brand-accent-rgb, 138 138 148) / 0.9) 0%, transparent 72%);
-  animation: bf-float-blob-1 25s ease-in-out infinite;
+  animation: bf-float-blob-1 32s ease-in-out infinite;
+  animation-delay: -4s;
 }
 
 .bf-liquid-blob-2 {
@@ -3620,7 +3632,8 @@ body {
   bottom: 20%;
   opacity: 0.56;
   background: radial-gradient(circle, rgb(var(--brand-glow-b-rgb, var(--brand-accent-rgb)) / 0.88) 0%, transparent 72%);
-  animation: bf-float-blob-2 30s ease-in-out infinite;
+  animation: bf-float-blob-2 36s ease-in-out infinite;
+  animation-delay: -8s;
 }
 
 .bf-liquid-blob-3 {
@@ -3630,39 +3643,48 @@ body {
   top: 45%;
   opacity: 0.5;
   background: radial-gradient(circle, rgb(var(--brand-accent-rgb, 138 138 148) / 0.55) 0%, rgb(var(--brand-glow-b-rgb, var(--brand-accent-rgb)) / 0.5) 48%, transparent 74%);
-  animation: bf-float-blob-3 22s ease-in-out infinite;
+  animation: bf-float-blob-3 28s ease-in-out infinite;
+  animation-delay: -14s;
 }
 
 @keyframes bf-float-blob-1 {
-  0%, 100% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
   }
+
   33% {
-    transform: translate(30px, -50px) scale(1.15) rotate(120deg);
+    transform: translate(16px, -22px) scale(1.06);
   }
+
   66% {
-    transform: translate(-20px, 20px) scale(0.9) rotate(240deg);
+    transform: translate(-12px, 12px) scale(0.97);
   }
 }
 
 @keyframes bf-float-blob-2 {
-  0%, 100% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
   }
+
   33% {
-    transform: translate(-40px, 40px) scale(0.85) rotate(-120deg);
+    transform: translate(-18px, 20px) scale(0.96);
   }
+
   66% {
-    transform: translate(25px, -30px) scale(1.1) rotate(-240deg);
+    transform: translate(14px, -16px) scale(1.05);
   }
 }
 
 @keyframes bf-float-blob-3 {
-  0%, 100% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
   }
+
   50% {
-    transform: translate(40px, 30px) scale(1.2) rotate(180deg);
+    transform: translate(20px, 16px) scale(1.08);
   }
 }
 
