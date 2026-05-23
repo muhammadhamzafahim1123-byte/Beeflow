@@ -25,8 +25,9 @@ type Member = {
   leaveFrom?: string;
   leaveTo?: string;
 };
-type Project = { id: string; name: string; client: string; ownerId: string; xProfile?: string; website?: string; description?: string; audience?: string; logoImage?: string; brandAccent?: string; brandAccentSecondary?: string };
+type Project = { id: string; name: string; client: string; ownerId: string; xProfile?: string; website?: string; description?: string; audience?: string; logoImage?: string; brandAccent?: string; brandAccentSecondary?: string; brandPaletteVersion?: number };
 type BrandPalette = { primary: string; secondary: string };
+const BRAND_PALETTE_VERSION = 3;
 type Activity = { id: string; actor: string; action: string; at: string };
 type Comment = { id: string; author: string; text: string; at: string; authorId?: string; attachments?: FileItem[] };
 type Subtask = { id: string; label: string; done: boolean };
@@ -136,17 +137,16 @@ export default function BeeFlowApp() {
   useEffect(() => {
     if (!hydrated) return;
     const brandsToExtract = store.projects.filter((project) => {
-      const src = project.logoImage || brandXAvatarUrl(project);
-      return src && (!project.brandAccent || !project.brandAccentSecondary || isWeakBrandAccent(project.brandAccent));
+      const hasSource = Boolean(project.logoImage || cleanXHandle(project.xProfile || ""));
+      return hasSource && project.brandPaletteVersion !== BRAND_PALETTE_VERSION;
     });
     if (!brandsToExtract.length) return;
     let cancelled = false;
     Promise.all(
       brandsToExtract.map(async (project) => {
-        const src = project.logoImage || brandXAvatarUrl(project);
         try {
-          const palette = await brandPaletteFromImageSrc(src);
-          return palette ? { id: project.id, palette } : { id: project.id, palette: null };
+          const palette = await brandPaletteForProject(project);
+          return { id: project.id, palette };
         } catch {
           return { id: project.id, palette: null };
         }
@@ -161,9 +161,13 @@ export default function BeeFlowApp() {
           if (!paletteById.has(project.id)) return project;
           const palette = paletteById.get(project.id);
           if (!palette) return project;
-          if (palette.primary === project.brandAccent && palette.secondary === project.brandAccentSecondary) return project;
           changed = true;
-          return { ...project, brandAccent: palette.primary, brandAccentSecondary: palette.secondary };
+          return {
+            ...project,
+            brandAccent: palette.primary,
+            brandAccentSecondary: palette.secondary,
+            brandPaletteVersion: BRAND_PALETTE_VERSION
+          };
         });
         return changed ? { ...current, projects } : current;
       });
@@ -354,8 +358,7 @@ export default function BeeFlowApp() {
   }
 
   function brandXAvatarUrl(brand: Project) {
-    const handle = brandHandle(brand);
-    return handle ? `https://unavatar.io/x/${encodeURIComponent(handle)}` : "";
+    return xAvatarUrlForProject(brand);
   }
 
   function deleteBrand(brandId: string) {
@@ -821,7 +824,7 @@ export default function BeeFlowApp() {
     const title = String(data.get("title") || "").trim();
     if (title.length < 3) return setErrors({ title: "Minimum 3 characters." });
     const brandId = crypto.randomUUID();
-    setStore((s) => modal === "project" ? { ...s, projects: [...s.projects, { id: brandId, name: title, client: String(data.get("client") || "Internal").trim() || "Internal", ownerId: currentUserId, xProfile: String(data.get("xProfile") || "").trim(), website: String(data.get("website") || "").trim(), description: String(data.get("description") || "").trim(), audience: String(data.get("audience") || "").trim(), logoImage: brandImageDraft, brandAccent: brandColorDraft, brandAccentSecondary: brandSecondaryColorDraft }] } : { ...s, members: [...s.members, { id: crypto.randomUUID(), name: title, role: "Designer", department: "Creative", avatar: initials(title), capacity: 35 }] });
+    setStore((s) => modal === "project" ? { ...s, projects: [...s.projects, { id: brandId, name: title, client: String(data.get("client") || "Internal").trim() || "Internal", ownerId: currentUserId, xProfile: String(data.get("xProfile") || "").trim(), website: String(data.get("website") || "").trim(), description: String(data.get("description") || "").trim(), audience: String(data.get("audience") || "").trim(), logoImage: brandImageDraft, brandAccent: brandColorDraft, brandAccentSecondary: brandSecondaryColorDraft || brandColorDraft, brandPaletteVersion: brandColorDraft ? BRAND_PALETTE_VERSION : undefined }] } : { ...s, members: [...s.members, { id: crypto.randomUUID(), name: title, role: "Designer", department: "Creative", avatar: initials(title), capacity: 35 }] });
     if (modal === "project") {
       setView("projects");
       setSelectedProjectId(brandId);
@@ -895,7 +898,7 @@ export default function BeeFlowApp() {
     const [image, palette] = await Promise.all([makeProfileAvatarDataUrl(file), brandPaletteFromFile(file)]);
     setBrandImageDraft(image);
     setBrandColorDraft(palette?.primary || "");
-    setBrandSecondaryColorDraft(palette?.secondary || "");
+    setBrandSecondaryColorDraft(palette?.secondary || palette?.primary || "");
     setErrors({});
   }
 
@@ -1278,7 +1281,8 @@ function normalizeProject(project: Project): Project {
     audience: project.audience || "",
     logoImage: project.logoImage || "",
     brandAccent: project.brandAccent || "",
-    brandAccentSecondary: project.brandAccentSecondary || ""
+    brandAccentSecondary: project.brandAccentSecondary || "",
+    brandPaletteVersion: project.brandPaletteVersion || 0
   };
 }
 
@@ -1288,44 +1292,39 @@ function brandAccentStyle(brand: Project): CSSProperties {
     "--brand-accent": colors.accent,
     "--brand-accent-rgb": hexToRgbParts(colors.accent),
     "--brand-glow-b": colors.secondary,
-    "--brand-glow-b-rgb": hexToRgbParts(colors.secondary)
+    "--brand-glow-b-rgb": hexToRgbParts(colors.secondary),
+    "--brand-border-rgb": hexToRgbParts(colors.border)
   } as CSSProperties;
 }
 
 function brandAccentColors(brand: Project) {
   if (brand.brandAccent) return expandBrandPalette(brand.brandAccent, brand.brandAccentSecondary);
-  const logoColor = brand.logoImage ? colorFromDataUrl(brand.logoImage) : "";
-  if (logoColor) return expandBrandPalette(logoColor);
-  return { accent: "#28e8c0", secondary: "#f7931e", tertiary: "#f7931e" };
+  return { accent: "#8a8a94", secondary: "#8a8a94", tertiary: "#8a8a94", border: "#8a8a94" };
 }
 
 function expandBrandPalette(accent: string, secondary?: string) {
-  const secondaryColor = secondary && secondary !== accent ? secondary : deriveBrandSecondary(accent);
-  return { accent, secondary: secondaryColor, tertiary: secondaryColor };
+  const secondaryColor = secondary && secondary !== accent ? secondary : accent;
+  const border = pickBorderColor(accent, secondaryColor);
+  return { accent, secondary: secondaryColor, tertiary: secondaryColor, border };
 }
 
-function isWeakBrandAccent(hex: string) {
+function pickBorderColor(...hexes: string[]) {
+  const ranked = hexes
+    .filter(Boolean)
+    .map((hex) => ({ hex, score: brandColorVisibilityScore(hex) }))
+    .sort((a, b) => b.score - a.score);
+  return ranked[0]?.hex || hexes[0] || "#8a8a94";
+}
+
+function brandColorVisibilityScore(hex: string) {
   const rgb = hexToRgb(hex);
-  if (!rgb) return true;
+  if (!rgb) return 0;
   const [r, g, b] = rgb;
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const saturation = max === 0 ? 0 : (max - min) / max;
   const brightness = (r + g + b) / (3 * 255);
-  return saturation < 0.18 || brightness > 0.82;
-}
-
-function deriveBrandSecondary(hex: string) {
-  const rgb = hexToRgb(hex);
-  if (!rgb) return "#f7931e";
-  const [h, s, l] = rgbToHsl(rgb);
-  const shifted = hslToRgb([(h + 148) % 360, Math.min(0.95, Math.max(0.55, s * 1.05)), Math.min(0.68, Math.max(0.42, l))]);
-  return rgbToHex(shifted);
-}
-
-function colorFromDataUrl(value: string) {
-  const match = value.match(/#([0-9a-f]{6})/i);
-  return match ? `#${match[1]}` : "";
+  return saturation * 1.4 + brightness * 0.85;
 }
 
 function hexToRgbParts(hex: string) {
@@ -1351,6 +1350,11 @@ function cleanXHandle(value: string) {
     .replace(/^@/, "")
     .split(/[/?#]/)[0]
     .trim();
+}
+
+function xAvatarUrlForProject(project: Project) {
+  const handle = cleanXHandle(project.xProfile || "");
+  return handle ? `https://unavatar.io/x/${encodeURIComponent(handle)}` : "";
 }
 
 function safePersistStore(store: Store) {
@@ -1444,7 +1448,7 @@ function brandPaletteFromFile(file: File) {
     const image = new Image();
     image.onload = () => {
       URL.revokeObjectURL(objectUrl);
-      resolve(sampleBrandPaletteFromImage(image));
+      resolve(sampleBrandPaletteFromImages([image]));
     };
     image.onerror = () => {
       URL.revokeObjectURL(objectUrl);
@@ -1454,34 +1458,80 @@ function brandPaletteFromFile(file: File) {
   });
 }
 
-function brandPaletteFromImageSrc(src: string) {
-  return new Promise<BrandPalette | null>((resolve) => {
+async function brandPaletteForProject(project: Project) {
+  const sources = await brandImageSources(project);
+  if (!sources.length) return null;
+  const images = (await Promise.all(sources.map(loadBrandImageElement))).filter((image): image is HTMLImageElement => Boolean(image));
+  return sampleBrandPaletteFromImages(images);
+}
+
+async function brandImageSources(project: Project) {
+  const sources: string[] = [];
+  if (project.logoImage) sources.push(project.logoImage);
+  const handle = cleanXHandle(project.xProfile || "");
+  if (handle) {
+    try {
+      const response = await fetch(`/api/brand/x-assets?handle=${encodeURIComponent(handle)}`);
+      if (response.ok) {
+        const assets = await response.json() as { avatar?: string; banner?: string };
+        if (assets.avatar) sources.push(proxiedBrandImageSrc(assets.avatar));
+        if (assets.banner) sources.push(proxiedBrandImageSrc(assets.banner));
+      }
+    } catch {
+      // Fall back to avatar proxy below.
+    }
+    const avatar = xAvatarUrlForProject(project);
+    if (avatar) sources.push(proxiedBrandImageSrc(avatar));
+  }
+  return [...new Set(sources)];
+}
+
+function proxiedBrandImageSrc(url: string) {
+  if (!url) return "";
+  if (url.startsWith("data:") || url.startsWith("/")) return url;
+  return `/api/brand/image-proxy?url=${encodeURIComponent(url)}`;
+}
+
+function loadBrandImageElement(src: string) {
+  return new Promise<HTMLImageElement | null>((resolve) => {
     if (!src) {
       resolve(null);
       return;
     }
     const image = new Image();
     image.crossOrigin = "anonymous";
-    image.onload = () => resolve(sampleBrandPaletteFromImage(image));
+    image.onload = () => resolve(image);
     image.onerror = () => resolve(null);
     image.src = src;
   });
 }
 
-function sampleBrandPaletteFromImage(image: CanvasImageSource): BrandPalette | null {
+type BrandColorBucket = { r: number; g: number; b: number; score: number };
+
+function sampleBrandPaletteFromImages(images: HTMLImageElement[]): BrandPalette | null {
+  const buckets = new Map<string, BrandColorBucket>();
+  for (const image of images) {
+    accumulateBrandColorBuckets(image, buckets);
+  }
+  return pickBrandPaletteFromBuckets(buckets);
+}
+
+function accumulateBrandColorBuckets(image: CanvasImageSource, buckets: Map<string, BrandColorBucket>) {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d", { willReadFrequently: true });
-  if (!context) return null;
-  const size = 48;
+  if (!context) return;
+  const width = image instanceof HTMLImageElement ? image.naturalWidth || 64 : 64;
+  const height = image instanceof HTMLImageElement ? image.naturalHeight || 64 : 64;
+  const longest = Math.max(width, height, 1);
+  const size = Math.min(96, Math.max(56, longest));
   canvas.width = size;
   canvas.height = size;
   try {
     context.drawImage(image, 0, 0, size, size);
     const pixels = context.getImageData(0, 0, size, size).data;
-    const buckets = new Map<number, { r: number; g: number; b: number; score: number }>();
     for (let index = 0; index < pixels.length; index += 4) {
       const alpha = pixels[index + 3] / 255;
-      if (alpha < 0.35) continue;
+      if (alpha < 0.4) continue;
       const red = pixels[index];
       const green = pixels[index + 1];
       const blue = pixels[index + 2];
@@ -1489,77 +1539,59 @@ function sampleBrandPaletteFromImage(image: CanvasImageSource): BrandPalette | n
       const min = Math.min(red, green, blue);
       const saturation = max - min;
       const brightness = (red + green + blue) / 3;
-      if (brightness < 22 || brightness > 238) continue;
-      if (saturation < 28 && brightness > 165) continue;
-      const vividness = saturation / 255;
-      const brightnessBalance = Math.max(0.18, 1 - Math.abs(brightness - 128) / 150);
-      const pixelWeight = alpha * Math.max(0.05, vividness * vividness * 4.2) * brightnessBalance;
-      if (saturation < 24) continue;
-      const [hue] = rgbToHsl([red, green, blue]);
-      const bucket = Math.floor(hue / 10);
-      const current = buckets.get(bucket) || { r: 0, g: 0, b: 0, score: 0 };
+      if (brightness < 10) continue;
+      const isBrandLight = brightness > 210 && saturation < 40;
+      const isBrandVivid = saturation >= 36;
+      if (!isBrandLight && !isBrandVivid) continue;
+      if (brightness > 248 && saturation < 18) continue;
+      const vividness = isBrandLight ? 0.55 : saturation / 255;
+      const pixelWeight = alpha * Math.max(0.08, vividness * vividness * 5.5);
+      const key = brandColorBucketKey(red, green, blue);
+      const current = buckets.get(key) || { r: 0, g: 0, b: 0, score: 0 };
       current.r += red * pixelWeight;
       current.g += green * pixelWeight;
       current.b += blue * pixelWeight;
       current.score += pixelWeight;
-      buckets.set(bucket, current);
+      buckets.set(key, current);
     }
-    const ranked = Array.from(buckets.entries())
-      .map(([bucket, value]) => ({
-        bucket,
-        score: value.score,
-        rgb: [Math.round(value.r / value.score), Math.round(value.g / value.score), Math.round(value.b / value.score)] as [number, number, number]
-      }))
-      .filter((item) => item.score > 0)
-      .sort((a, b) => b.score - a.score);
-    if (!ranked.length) return null;
-    const primary = rgbToHex(ranked[0].rgb);
-    const secondaryEntry = ranked.find((item, index) => {
-      if (index === 0) return false;
-      const hueDistance = Math.min(Math.abs(item.bucket - ranked[0].bucket), 36 - Math.abs(item.bucket - ranked[0].bucket));
-      return hueDistance >= 3;
-    });
-    const secondary = secondaryEntry ? rgbToHex(secondaryEntry.rgb) : deriveBrandSecondary(primary);
-    return { primary, secondary };
   } catch {
-    return null;
+    // Ignore unreadable image pixels.
   }
 }
 
-function rgbToHsl([r, g, b]: [number, number, number]): [number, number, number] {
-  const rn = r / 255;
-  const gn = g / 255;
-  const bn = b / 255;
-  const max = Math.max(rn, gn, bn);
-  const min = Math.min(rn, gn, bn);
-  const delta = max - min;
-  let hue = 0;
-  const lightness = (max + min) / 2;
-  const saturation = delta === 0 ? 0 : delta / (1 - Math.abs(2 * lightness - 1));
-  if (delta !== 0) {
-    if (max === rn) hue = ((gn - bn) / delta) % 6;
-    else if (max === gn) hue = (bn - rn) / delta + 2;
-    else hue = (rn - gn) / delta + 4;
-    hue *= 60;
-    if (hue < 0) hue += 360;
-  }
-  return [hue, saturation, lightness];
+function brandColorBucketKey(red: number, green: number, blue: number) {
+  return `${red >> 4},${green >> 4},${blue >> 4}`;
 }
 
-function hslToRgb([h, s, l]: [number, number, number]): [number, number, number] {
-  const c = (1 - Math.abs(2 * l - 1)) * s;
-  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-  const m = l - c / 2;
-  let rn = 0;
-  let gn = 0;
-  let bn = 0;
-  if (h < 60) [rn, gn, bn] = [c, x, 0];
-  else if (h < 120) [rn, gn, bn] = [x, c, 0];
-  else if (h < 180) [rn, gn, bn] = [0, c, x];
-  else if (h < 240) [rn, gn, bn] = [0, x, c];
-  else if (h < 300) [rn, gn, bn] = [x, 0, c];
-  else [rn, gn, bn] = [c, 0, x];
-  return [Math.round((rn + m) * 255), Math.round((gn + m) * 255), Math.round((bn + m) * 255)];
+function pickBrandPaletteFromBuckets(buckets: Map<string, BrandColorBucket>): BrandPalette | null {
+  const ranked = Array.from(buckets.values())
+    .map((bucket) => ({
+      score: bucket.score,
+      rgb: [Math.round(bucket.r / bucket.score), Math.round(bucket.g / bucket.score), Math.round(bucket.b / bucket.score)] as [number, number, number]
+    }))
+    .filter((item) => item.score > 0 && isUsableBrandRgb(item.rgb))
+    .sort((a, b) => b.score - a.score);
+  if (!ranked.length) return null;
+  const primary = rgbToHex(ranked[0].rgb);
+  const secondaryEntry = ranked.find((item, index) => {
+    if (index === 0) return false;
+    if (item.score < ranked[0].score * 0.1) return false;
+    return rgbDistance(ranked[0].rgb, item.rgb) >= 42;
+  });
+  const secondary = secondaryEntry ? rgbToHex(secondaryEntry.rgb) : primary;
+  return { primary, secondary };
+}
+
+function isUsableBrandRgb([r, g, b]: [number, number, number]) {
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const saturation = max - min;
+  const brightness = (r + g + b) / 3;
+  return saturation >= 36 || brightness >= 205;
+}
+
+function rgbDistance(a: [number, number, number], b: [number, number, number]) {
+  return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 }
 
 function normalizeAttachment(file: FileItem, stripPreviews = false): FileItem {
